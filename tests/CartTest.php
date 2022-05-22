@@ -10,7 +10,7 @@ it('is empty as default', function() {
 
 
 it('is can get instance key', function() {
-     expect(Cart::getInstanceKey())->toBe('cart');
+    expect(Cart::getInstanceKey())->toBe('cart');
 });
 
 
