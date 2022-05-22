@@ -185,7 +185,6 @@ class Cart
             })
             ->pipeInto(ConditionCollection::class)
             ->filterType($type);
-
     }
 
     public function conditions($type = null): ConditionCollection
