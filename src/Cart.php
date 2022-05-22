@@ -2,6 +2,8 @@
 
 namespace Ozdemir\Cart;
 
+use Ozdemir\Cart\Storage\StorageInterface;
+
 class Cart
 {
     /**
@@ -14,30 +16,63 @@ class Cart
      */
     protected ConditionCollection $conditions;
 
-    protected $conditionsOrder = ['discount', 'other', 'tax', 'shipping'];
+    /**
+     * @var array|mixed|string[]
+     */
+    protected array $conditionsOrder = ['discount', 'other', 'tax', 'shipping'];
 
-    protected $itemConditionsOrder = ['discount', 'other', 'tax', 'shipping'];
+    /**
+     * @var array|mixed|string[]
+     */
+    protected array $itemConditionsOrder = ['discount', 'other', 'tax', 'shipping'];
 
-    private $storage;
-    private $config;
+    /**
+     * @var StorageInterface
+     */
+    private StorageInterface $storage;
+
+    /**
+     * @var
+     */
     private $dispatcher;
 
-    public function __construct($storage, $dispatcher, $config)
+    /**
+     * @var array
+     */
+    private array $config;
+
+    public function __construct(StorageInterface $storage, $dispatcher, $config)
     {
         $this->storage = $storage;
         $this->dispatcher = $dispatcher;
-        $this->config = $config;
+        $this->config = array_merge(config('cart'), $config);
 
         $this->items = $this->storage->get('cart:items') ?? new CartCollection();
-
         $this->conditions = $this->storage->get('cart:conditions') ?? new ConditionCollection();
 
         $this->conditionsOrder = $this->storage->get('cart:conditionsOrder') ?? $this->conditionsOrder;
         $this->itemConditionsOrder = $this->storage->get('cart:itemConditionsOrder') ?? $this->itemConditionsOrder;
     }
 
+    public function instance(StorageInterface $storage, $dispatcher = null, $config = null)
+    {
+        return new self($storage, $dispatcher ?? $this->dispatcher, $config ?? $this->config);
+    }
+
+    public function getInstanceKey()
+    {
+        return $this->storage->instance;
+    }
+
+    public function emit($event, ...$args)
+    {
+        $this->dispatcher->dispatch($this->getInstanceKey().'.'.$event, ...$args);
+    }
+
     public function add($data)
     {
+        $this->emit('adding');
+
         if (is_array(head($data))) {
             foreach ($data as $item) {
                 $this->add($item);
@@ -50,6 +85,8 @@ class Cart
 
         $this->updateItemStorage();
 
+        $this->emit('added');
+
         return $this;
     }
 
@@ -58,6 +95,8 @@ class Cart
      */
     public function update($key, $data = [])
     {
+        $this->emit('updating');
+
         if (is_array($key)) {
             foreach ($key as $k => $d) {
                 $this->update($k, $d);
@@ -80,6 +119,8 @@ class Cart
             // update values
             $this->items->get($key)->update($data);
         }
+
+        $this->emit('updated');
     }
 
     /**
@@ -102,7 +143,11 @@ class Cart
 
     public function remove($key)
     {
+        $this->emit('removing');
+
         $this->items->forget($key);
+
+        $this->emit('removed');
 
         return $this;
     }
@@ -141,7 +186,15 @@ class Cart
 
     public function clear()
     {
-        return $this->items = new CartCollection();
+        $this->emit('clearing');
+        $this->items = new CartCollection();
+        $this->updateItemStorage();
+
+        $this->conditions = new ConditionCollection();
+        $this->updateConditionStorage();
+        $this->emit('cleared');
+
+        return $this;
     }
 
     public function sync($data)
@@ -226,12 +279,16 @@ class Cart
     /**
      * @param  string[]  $itemConditionsOrder
      */
-    public function setItemConditionsOrder(array $itemConditionsOrder): void
+    public function setItemConditionsOrder(array $itemConditionsOrder, $updateExisting = true): void
     {
         // todo : validation..
         $this->storage->put('cart:itemConditionsOrder', $itemConditionsOrder);
 
         $this->itemConditionsOrder = $itemConditionsOrder;
+
+        if ($updateExisting) {
+            $this->items()->each->setItemConditionsOrder($itemConditionsOrder);
+        }
     }
 
     private function updateItemStorage()

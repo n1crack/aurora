@@ -4,7 +4,7 @@ namespace Ozdemir\Cart\Storage;
 
 class ArrayStorage implements StorageInterface
 {
-    private $instance;
+    public string $instance;
 
     private $session = [];
 

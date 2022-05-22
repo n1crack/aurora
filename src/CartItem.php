@@ -26,9 +26,17 @@ class CartItem extends Collection
 
         parent::__construct($items);
 
-        $this->itemConditionsOrder = $itemConditionsOrder;
+        $this->setItemConditionsOrder($itemConditionsOrder);
 
         $this->put('hash', $this->hash());
+    }
+
+    /**
+     * @param  array  $itemConditionsOrder
+     */
+    public function setItemConditionsOrder(array $itemConditionsOrder): void
+    {
+        $this->itemConditionsOrder = $itemConditionsOrder;
     }
 
     /**

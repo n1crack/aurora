@@ -21,7 +21,9 @@ class CartServiceProvider extends ServiceProvider
 
             $storage = new $storageClass($defaultInstance);
 
-            return new Cart($storage, new Dispatcher(), config('cart') ?? []);
+            $dispatcher = $app->get('events');
+
+            return new Cart($storage, $dispatcher, config('cart') ?? []);
         });
     }
 

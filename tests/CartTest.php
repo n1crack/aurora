@@ -8,6 +8,12 @@ it('is empty as default', function() {
     expect(Cart::isEmpty())->toBeTrue();
 });
 
+
+it('is can get instance key', function() {
+     expect(Cart::getInstanceKey())->toBe('cart');
+});
+
+
 it('can add items to Cart', function() {
     Cart::add([
         'id' => 'tshirt',
@@ -320,4 +326,40 @@ it('can get items from hash', function() {
     expect(Cart::item($item->hash)->attributes->first())->toBeInstanceOf(CartAttribute::class);
     expect(Cart::item($item->hash)->attributes->first()->label)->toBe('Blue');
     expect(Cart::item($item->hash)->attributes->last()->label)->toBe('Small');
+});
+
+
+it('can initialize a new instance', function() {
+    Cart::add([
+        'id' => 'tshirt',
+        'name' => 'T-Shirt',
+        'quantity' => 2,
+        'price' => 30,
+        'weight' => 4,
+    ]);
+
+    expect(Cart::items())->toHaveCount(1);
+
+    $newStorage = new \Ozdemir\Cart\Storage\ArrayStorage('wishlist');
+
+    $wishlist = Cart::instance($newStorage);
+
+    expect($wishlist->items())->toHaveCount(0);
+
+    $wishlist->add([
+        'id' => 'tshirt',
+        'name' => 'T-Shirt',
+        'quantity' => 100,
+        'price' => 30,
+        'weight' => 5,
+    ]);
+    expect($wishlist->items())->toHaveCount(1);
+    expect($wishlist->quantity())->toBe(100);
+    expect($wishlist->weight())->toBe(500);
+    expect($wishlist->getInstanceKey())->toBe('wishlist');
+
+    expect(Cart::items())->toHaveCount(1);
+    expect(Cart::quantity())->toBe(2);
+    expect(Cart::weight())->toBe(8);
+    expect(Cart::getInstanceKey())->toBe('cart');
 });

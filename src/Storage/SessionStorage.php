@@ -4,7 +4,7 @@ namespace Ozdemir\Cart\Storage;
 
 class SessionStorage implements StorageInterface
 {
-    private $instance;
+    public string $instance;
 
     public function __construct($instance)
     {
