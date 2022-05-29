@@ -277,7 +277,6 @@ it('can set condition orders', function() {
 
 
 it('can set items condition orders', function() {
-
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -320,7 +319,6 @@ it('can set items condition orders', function() {
 });
 
 it('can set items condition orders without update existing items', function() {
-
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',

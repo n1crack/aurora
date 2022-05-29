@@ -2,7 +2,6 @@
 
 namespace Ozdemir\Cart;
 
-use Illuminate\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 
 class CartServiceProvider extends ServiceProvider
