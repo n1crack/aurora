@@ -8,11 +8,9 @@ it('is empty as default', function() {
     expect(Cart::isEmpty())->toBeTrue();
 });
 
-
 it('is can get instance key', function() {
-     expect(Cart::getInstanceKey())->toBe('cart');
+    expect(Cart::getInstanceKey())->toBe('cart');
 });
-
 
 it('can add items to Cart', function() {
     Cart::add([
@@ -327,7 +325,6 @@ it('can get items from hash', function() {
     expect(Cart::item($item->hash)->attributes->first()->label)->toBe('Blue');
     expect(Cart::item($item->hash)->attributes->last()->label)->toBe('Small');
 });
-
 
 it('can initialize a new instance', function() {
     Cart::add([

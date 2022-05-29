@@ -69,6 +69,11 @@ class Cart
         $this->dispatcher->dispatch($this->getInstanceKey().'.'.$event, ...$args);
     }
 
+    public function listen($event, $callback)
+    {
+        $this->dispatcher->listen($this->getInstanceKey().'.'.$event, $callback());
+    }
+
     public function add($data)
     {
         $this->emit('adding');
@@ -120,6 +125,7 @@ class Cart
             $this->items->get($key)->update($data);
         }
 
+        $this->updateItemStorage();
         $this->emit('updated');
     }
 
@@ -147,6 +153,7 @@ class Cart
 
         $this->items->forget($key);
 
+        $this->updateItemStorage();
         $this->emit('removed');
 
         return $this;
@@ -222,6 +229,7 @@ class Cart
     public function removeCondition($name)
     {
         $this->conditions->pull($name);
+        $this->updateConditionStorage();
     }
 
     public function itemConditions($type = null): ConditionCollection
@@ -298,5 +306,29 @@ class Cart
     private function updateConditionStorage()
     {
         $this->storage->put('cart:conditions', $this->conditions);
+    }
+
+    public function serialize()
+    {
+        return serialize([
+            $this->items,
+            $this->conditions,
+            $this->conditionsOrder,
+            $this->itemConditionsOrder,
+            $this->storage,
+        ]);
+    }
+
+    public function unserialize($string)
+    {
+        [
+            $this->items,
+            $this->conditions,
+            $this->conditionsOrder,
+            $this->itemConditionsOrder,
+            $this->storage,
+        ] = unserialize($string, [CartCollection::class, ConditionCollection::class, StorageInterface::class]);
+
+        return $this;
     }
 }
