@@ -54,7 +54,7 @@ class Cart
         $this->itemConditionsOrder = $this->storage->get('cart:itemConditionsOrder') ?? $this->itemConditionsOrder;
     }
 
-    public function instance(StorageInterface $storage, $dispatcher = null, $config = null)
+    public function clone(StorageInterface $storage, $dispatcher = null, $config = null): Cart
     {
         return new self($storage, $dispatcher ?? $this->dispatcher, $config ?? $this->config);
     }
@@ -86,7 +86,9 @@ class Cart
             return $this;
         }
 
-        $this->items->updateOrAdd(new CartItem($data, $this->itemConditionsOrder));
+        $cartItemClass = $this->config['cart_item'];
+
+        $this->items->updateOrAdd(new $cartItemClass($data, $this->itemConditionsOrder));
 
         $this->updateItemStorage();
 
@@ -178,7 +180,7 @@ class Cart
 
     public function subtotal()
     {
-        return $this->items->sum(fn ($item) => $item->subtotal());
+        return $this->items->sum(fn($item) => $item->subtotal());
     }
 
     public function quantity()
@@ -188,7 +190,7 @@ class Cart
 
     public function weight()
     {
-        return $this->items->sum(fn ($item) => $item->weight() * $item->quantity);
+        return $this->items->sum(fn($item) => $item->weight() * $item->quantity);
     }
 
     public function clear()
@@ -238,7 +240,7 @@ class Cart
             ->pluck('conditions')
             ->flatten()
             ->groupBy('name')
-            ->map(function($conditions) {
+            ->map(function ($conditions) {
                 $condition = $conditions->first();
                 $condition->value = $conditions->sum('value');
 
@@ -273,7 +275,7 @@ class Cart
     }
 
     /**
-     * @param  string[]  $conditionsOrder
+     * @param string[] $conditionsOrder
      */
     public function setConditionsOrder(array $conditionsOrder): void
     {
@@ -284,7 +286,7 @@ class Cart
     }
 
     /**
-     * @param  string[]  $itemConditionsOrder
+     * @param string[] $itemConditionsOrder
      */
     public function setItemConditionsOrder(array $itemConditionsOrder, $updateExisting = true): void
     {
