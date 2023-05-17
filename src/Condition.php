@@ -12,7 +12,6 @@ class Condition extends Collection
 {
     use CollectionArrayAccess;
 
-
     /**
      * @param $props
      * @throws \Exception
