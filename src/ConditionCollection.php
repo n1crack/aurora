@@ -8,7 +8,7 @@ class ConditionCollection extends Collection
 {
     public function sortByOrder($order)
     {
-        return $this->sortBy(fn($item) => array_search($item->type, $order, true))->values();
+        return $this->sortBy(fn ($item) => array_search($item->type, $order, true))->values();
     }
 
     public function calculateSubTotal($subtotal)
@@ -23,6 +23,6 @@ class ConditionCollection extends Collection
 
     public function filterType($type)
     {
-        return $this->when($type, fn($conditions) => $conditions->where('type', $type));
+        return $this->when($type, fn ($conditions) => $conditions->where('type', $type));
     }
 }
