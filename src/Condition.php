@@ -2,26 +2,25 @@
 
 namespace Ozdemir\Aurora;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Laravel\SerializableClosure\SerializableClosure;
+use Ozdemir\Aurora\Traits\CollectionArrayAccess;
 
-class Condition
+class Condition extends Collection
 {
-    public string $name;
-    public string $target;
-    public string $type;
-    public array $actions;
-    public float $value;
+    use CollectionArrayAccess;
+
 
     /**
      * @param $props
      * @throws \Exception
      */
-    public function __construct($props)
+    public function __construct($items = [])
     {
-        $validator = Validator::make($props, [
-            'name' => ['required', 'string'],
+        $validator = Validator::make($items, [
+            'name' => ['required'],
             'type' => ['required', 'string', 'in:tax,discount,shipping,other'],
             'target' => ['required', 'string', 'in:subtotal,total'],
         ]);
@@ -30,9 +29,7 @@ class Condition
             throw new \Exception($validator->errors()->first());
         }
 
-        $this->name = $props['name'];
-        $this->type = $props['type'];
-        $this->target = $props['target'];
+        parent::__construct($items);
     }
 
     public function setActions($actions): void
