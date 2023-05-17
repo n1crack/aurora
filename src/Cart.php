@@ -114,12 +114,12 @@ class Cart
         }
 
         if (!$this->items->has($key)) {
-            throw new \Exception('item yok..');
+            throw new \Exception('Item has not found..');
         }
 
         if (is_int($data)) {
             if ($data < 1) {
-                throw new \Exception('negative veya sıfır değer girildi.');
+                throw new \Exception('Negative or zero value not allowed.');
             }
             // increase quantity
             $this->items->get($key)->setQuantity($data);

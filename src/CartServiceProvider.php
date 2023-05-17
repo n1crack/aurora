@@ -25,17 +25,4 @@ class CartServiceProvider extends ServiceProvider
             return new Cart($storage, $dispatcher, config('cart') ?? []);
         });
     }
-
-    public function boot()
-    {
-        $this->publishes([
-            __DIR__.'/../config/cart.php' => config_path('cart.php'),
-        ]);
-
-        $this->app->bind(Cart::class, function($app) {
-            $defaultInstance = config('cart.instance');
-
-            return $app[$defaultInstance];
-        });
-    }
 }
