@@ -339,7 +339,7 @@ it('can initialize a new instance', function() {
 
     $newStorage = new \Ozdemir\Aurora\Storage\ArrayStorage('wishlist');
 
-    $wishlist = Cart::instance($newStorage);
+    $wishlist = Cart::clone($newStorage);
 
     expect($wishlist->items())->toHaveCount(0);
 
