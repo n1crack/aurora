@@ -178,7 +178,7 @@ class Cart
 
     public function subtotal()
     {
-        return $this->items->sum(fn($item) => $item->subtotal());
+        return $this->items->sum(fn ($item) => $item->subtotal());
     }
 
     public function quantity()
@@ -188,7 +188,7 @@ class Cart
 
     public function weight()
     {
-        return $this->items->sum(fn($item) => $item->weight() * $item->quantity);
+        return $this->items->sum(fn ($item) => $item->weight() * $item->quantity);
     }
 
     public function clear()
