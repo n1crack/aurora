@@ -1,6 +1,6 @@
 <?php
 
-namespace Ozdemir\Cart\Traits;
+namespace Ozdemir\Aurora\Traits;
 
 trait CollectionArrayAccess
 {

@@ -1,9 +1,9 @@
 <?php
 
-use Ozdemir\Cart\Facades\Cart;
+use Ozdemir\Aurora\Facades\Cart;
 
 it('can add a new condition', function() {
-    $condition = new Ozdemir\Cart\Condition([
+    $condition = new Ozdemir\Aurora\Condition([
         'name' => 'VAT (6%)',
         'type' => 'tax',
         'target' => 'subtotal',
@@ -22,15 +22,15 @@ it('can add a new condition', function() {
 
     expect(Cart::hasCondition('VAT (6%)'))->toBeTrue();
 
-    expect(Cart::conditions())->toBeInstanceOf(\Ozdemir\Cart\ConditionCollection::class);
+    expect(Cart::conditions())->toBeInstanceOf(\Ozdemir\Aurora\ConditionCollection::class);
     expect(Cart::conditions())->toHaveCount(1);
 
-    expect(Cart::conditions()->first())->toBeInstanceOf(\Ozdemir\Cart\Condition::class);
+    expect(Cart::conditions()->first())->toBeInstanceOf(\Ozdemir\Aurora\Condition::class);
     expect(Cart::conditions()->first()->name)->toBe('VAT (6%)');
 });
 
 it('can remove a condition', function() {
-    $condition = new Ozdemir\Cart\Condition([
+    $condition = new Ozdemir\Aurora\Condition([
         'name' => 'VAT (6%)',
         'type' => 'tax',
         'target' => 'subtotal',
@@ -51,7 +51,7 @@ it('can remove a condition', function() {
 
     expect(Cart::hasCondition('VAT (6%)'))->toBeFalse();
 
-    expect(Cart::conditions())->toBeInstanceOf(\Ozdemir\Cart\ConditionCollection::class);
+    expect(Cart::conditions())->toBeInstanceOf(\Ozdemir\Aurora\ConditionCollection::class);
     expect(Cart::conditions())->toHaveCount(0);
 });
 
@@ -76,7 +76,7 @@ it('can add value to total ', function() {
     expect(Cart::subtotal())->toBe(530);
     expect(Cart::total())->toBe(530);
 
-    $condition = new Ozdemir\Cart\Condition([
+    $condition = new Ozdemir\Aurora\Condition([
         'name' => 'Shipping',
         'type' => 'shipping',
         'target' => 'subtotal',
@@ -116,7 +116,7 @@ it('can sub value from total ', function() {
     expect(Cart::subtotal())->toBe(530);
     expect(Cart::total())->toBe(530);
 
-    $condition = new Ozdemir\Cart\Condition([
+    $condition = new Ozdemir\Aurora\Condition([
         'name' => 'Discount',
         'type' => 'discount',
         'target' => 'subtotal',
@@ -156,7 +156,7 @@ it('can add percent value to total ', function() {
     expect(Cart::subtotal())->toBe(530);
     expect(Cart::total())->toBe(530);
 
-    $condition = new Ozdemir\Cart\Condition([
+    $condition = new Ozdemir\Aurora\Condition([
         'name' => 'Tax (6%)',
         'type' => 'tax',
         'target' => 'subtotal',
@@ -196,7 +196,7 @@ it('can sub percent value from total ', function() {
     expect(Cart::subtotal())->toBe(530);
     expect(Cart::total())->toBe(530);
 
-    $condition = new Ozdemir\Cart\Condition([
+    $condition = new Ozdemir\Aurora\Condition([
         'name' => 'Tax (6%)',
         'type' => 'tax',
         'target' => 'subtotal',
@@ -216,7 +216,7 @@ it('can sub percent value from total ', function() {
 });
 
 it('can set condition orders', function() {
-    $shipping = new Ozdemir\Cart\Condition([
+    $shipping = new Ozdemir\Aurora\Condition([
         'name' => 'Shipping',
         'type' => 'shipping',
         'target' => 'subtotal',
@@ -224,7 +224,7 @@ it('can set condition orders', function() {
     $shipping->setActions([['value' => '25']]);
     Cart::condition($shipping);
 
-    $tax = new Ozdemir\Cart\Condition([
+    $tax = new Ozdemir\Aurora\Condition([
         'name' => 'Tax',
         'type' => 'tax',
         'target' => 'subtotal',
@@ -232,7 +232,7 @@ it('can set condition orders', function() {
     $tax->setActions([['value' => '6%']]);
     Cart::condition($tax);
 
-    $other = new Ozdemir\Cart\Condition([
+    $other = new Ozdemir\Aurora\Condition([
         'name' => 'Other',
         'type' => 'other',
         'target' => 'subtotal',
@@ -240,7 +240,7 @@ it('can set condition orders', function() {
     $other->setActions([['value' => '125']]);
     Cart::condition($other);
 
-    $discount = new Ozdemir\Cart\Condition([
+    $discount = new Ozdemir\Aurora\Condition([
         'name' => 'Discount',
         'type' => 'discount',
         'target' => 'subtotal',
@@ -285,14 +285,14 @@ it('can set items condition orders', function() {
         'weight' => 1,
     ]);
 
-    $tax = new Ozdemir\Cart\Condition([
+    $tax = new Ozdemir\Aurora\Condition([
         'name' => 'Tax',
         'type' => 'tax',
         'target' => 'subtotal',
     ]);
     $tax->setActions([['value' => '6%']]);
 
-    $other = new Ozdemir\Cart\Condition([
+    $other = new Ozdemir\Aurora\Condition([
         'name' => 'Other',
         'type' => 'other',
         'target' => 'subtotal',
@@ -327,14 +327,14 @@ it('can set items condition orders without update existing items', function() {
         'weight' => 1,
     ]);
 
-    $tax = new Ozdemir\Cart\Condition([
+    $tax = new Ozdemir\Aurora\Condition([
         'name' => 'Tax',
         'type' => 'tax',
         'target' => 'subtotal',
     ]);
     $tax->setActions([['value' => '6%']]);
 
-    $other = new Ozdemir\Cart\Condition([
+    $other = new Ozdemir\Aurora\Condition([
         'name' => 'Other',
         'type' => 'other',
         'target' => 'subtotal',

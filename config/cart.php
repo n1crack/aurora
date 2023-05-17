@@ -4,6 +4,6 @@ return [
 
     'instance' => 'cart',
 
-    'storage' => \Ozdemir\Cart\Storage\SessionStorage::class,
+    'storage' => \Ozdemir\Aurora\Storage\SessionStorage::class,
 
 ];

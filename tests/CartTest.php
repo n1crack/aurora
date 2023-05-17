@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Collection;
-use Ozdemir\Cart\CartAttribute;
-use Ozdemir\Cart\Facades\Cart;
+use Ozdemir\Aurora\CartAttribute;
+use Ozdemir\Aurora\Facades\Cart;
 
 it('is empty as default', function() {
     expect(Cart::isEmpty())->toBeTrue();
@@ -313,7 +313,7 @@ it('can get items from hash', function() {
 
     $item = Cart::items()->first();
 
-    expect(Cart::item($item->hash))->toBeInstanceOf(\Ozdemir\Cart\CartItem::class);
+    expect(Cart::item($item->hash))->toBeInstanceOf(\Ozdemir\Aurora\CartItem::class);
     expect(Cart::item($item->hash)->id)->toBe('tshirt');
     expect(Cart::item($item->hash)->name)->toBe('T-Shirt');
     expect(Cart::item($item->hash)->quantity)->toBe(3);
@@ -337,7 +337,7 @@ it('can initialize a new instance', function() {
 
     expect(Cart::items())->toHaveCount(1);
 
-    $newStorage = new \Ozdemir\Cart\Storage\ArrayStorage('wishlist');
+    $newStorage = new \Ozdemir\Aurora\Storage\ArrayStorage('wishlist');
 
     $wishlist = Cart::instance($newStorage);
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Ozdemir\Cart;
+namespace Ozdemir\Aurora;
 
-use Ozdemir\Cart\Storage\StorageInterface;
+use Ozdemir\Aurora\Storage\StorageInterface;
 
 class Cart
 {

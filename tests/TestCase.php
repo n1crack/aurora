@@ -1,12 +1,12 @@
 <?php
 
-namespace Ozdemir\Cart\Tests;
+namespace Ozdemir\Aurora\Tests;
 
 use Illuminate\Events\Dispatcher;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Ozdemir\Cart\Cart;
-use Ozdemir\Cart\CartServiceProvider;
-use Ozdemir\Cart\Storage\ArrayStorage;
+use Ozdemir\Aurora\Cart;
+use Ozdemir\Aurora\CartServiceProvider;
+use Ozdemir\Aurora\Storage\ArrayStorage;
 
 class TestCase extends Orchestra
 {

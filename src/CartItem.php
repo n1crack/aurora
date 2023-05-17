@@ -1,12 +1,12 @@
 <?php
 
-namespace Ozdemir\Cart;
+namespace Ozdemir\Aurora;
 
 use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
-use Ozdemir\Cart\Traits\CollectionArrayAccess;
+use Ozdemir\Aurora\Traits\CollectionArrayAccess;
 
 class CartItem extends Collection
 {

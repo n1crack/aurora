@@ -1,6 +1,6 @@
 <?php
 
-use Ozdemir\Cart\Facades\Cart;
+use Ozdemir\Aurora\Facades\Cart;
 
 it('can not update if the quantity is negative', function() {
     Cart::add([

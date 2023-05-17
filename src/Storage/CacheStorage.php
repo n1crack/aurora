@@ -1,6 +1,6 @@
 <?php
 
-namespace Ozdemir\Cart\Storage;
+namespace Ozdemir\Aurora\Storage;
 
 class CacheStorage implements StorageInterface
 {

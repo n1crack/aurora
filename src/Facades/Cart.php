@@ -1,11 +1,11 @@
 <?php
 
-namespace Ozdemir\Cart\Facades;
+namespace Ozdemir\Aurora\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Ozdemir\Cart\Cart
+ * @see \Ozdemir\Aurora\Cart
  */
 class Cart extends Facade
 {

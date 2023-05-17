@@ -1,6 +1,6 @@
 <?php
 
-namespace Ozdemir\Cart;
+namespace Ozdemir\Aurora;
 
 use Illuminate\Support\ServiceProvider;
 
