@@ -12,7 +12,6 @@ class Condition extends Collection
 {
     use CollectionArrayAccess;
 
-
     /**
      * @param $props
      * @throws \Exception
@@ -69,22 +68,7 @@ class Condition extends Collection
     public function calculate($subtotal)
     {
         $value = 0;
-        if (is_array(head($this->actions))) {
-            foreach ($this->actions as $action) {
-                $actionVal = $action['value'];
-                $rule = $this->checkActionRule($action['rules'] ?? null);
-                if ($rule) {
-                    $value += $this->getActionValue($subtotal, $actionVal);
-                }
-            }
-        } else {
-            $actionVal = $this->actions['value'];
-
-            $rule = $this->checkActionRule($this->actions['rules'] ?? null);
-            if ($rule) {
-                $value += $this->getActionValue($subtotal, $actionVal);
-            }
-        }
+        $value = $this->calculateActionValue($subtotal, $value);
 
         return $value;
     }
@@ -120,5 +104,27 @@ class Condition extends Collection
         $value = trim($actionVal, " +-%");
 
         return $value * ($negative ? -1 : 1) * ($percentage ? $subtotal * 0.01 : 1);
+    }
+
+    /**
+     * @param $subtotal
+     * @param float|int $value
+     * @return float|int
+     */
+    public function calculateActionValue($subtotal, float|int $value): int|float
+    {
+        $actions = is_array(head($this->actions)) ? $this->actions : [$this->actions];
+
+        foreach ($actions as $action) {
+            $actionVal = $action['value'];
+
+            $rule = $this->checkActionRule($action['rules'] ?? null);
+
+            if ($rule) {
+                $value += $this->getActionValue($subtotal, $actionVal);
+            }
+        }
+
+        return $value;
     }
 }

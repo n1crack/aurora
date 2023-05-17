@@ -79,22 +79,23 @@ class Cart
         $this->emit('adding');
 
         if (is_array(head($data))) {
+            $added = [];
             foreach ($data as $item) {
-                $this->add($item);
+                $added[] = $this->add($item);
             }
 
-            return $this;
+            return $added;
         }
 
         $cartItemClass = $this->config['cart_item'];
-
-        $this->items->updateOrAdd(new $cartItemClass($data, $this->itemConditionsOrder));
+        $cartItem = new $cartItemClass($data, $this->itemConditionsOrder);
+        $this->items->updateOrAdd($cartItem);
 
         $this->updateItemStorage();
 
         $this->emit('added');
 
-        return $this;
+        return $this->item($cartItem->hash());
     }
 
     /**

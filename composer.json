@@ -49,10 +49,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Ozdemir\\Cart\\CartServiceProvider"
+                "Ozdemir\\Aurora\\CartServiceProvider"
             ],
             "aliases": {
-                "Cart": "Ozdemir\\Cart\\Facades\\Cart"
+                "Cart": "Ozdemir\\Aurora\\Facades\\Cart"
             }
         }
     },
