@@ -1,11 +1,11 @@
-# Laravel Shopping Cart
+# Aurora Shopping Cart for Laravel
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ozdemir/aurora.svg?style=flat-square)](https://packagist.org/packages/ozdemir/aurora)
 [![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/ozdemir/aurora/run-tests?label=tests)](https://github.com/ozdemir/aurora/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/ozdemir/aurora/Check%20&%20fix%20styling?label=code%20style)](https://github.com/ozdemir/aurora/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/ozdemir/aurora.svg?style=flat-square)](https://packagist.org/packages/ozdemir/aurora)
 
-The Laravel Cart package provides a convenient way to manage a shopping cart in your Laravel applications. It allows you to add, update, remove items, apply conditions, and calculate the total and subtotal amounts. 
+The Aurora Shopping Cart for Laravel package provides a convenient way to manage a shopping cart in your Laravel applications. It allows you to add, update, remove items, apply conditions, and calculate the total and subtotal amounts. 
 ## Support us
 
 ..
