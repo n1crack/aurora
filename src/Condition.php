@@ -5,12 +5,16 @@ namespace Ozdemir\Aurora;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Laravel\SerializableClosure\SerializableClosure;
 use Ozdemir\Aurora\Traits\CollectionArrayAccess;
+use Symfony\Component\VarDumper\VarDumper;
 
 class Condition extends Collection
 {
     use CollectionArrayAccess;
+
+    private $actions = [];
 
     /**
      * @param $props
@@ -20,8 +24,8 @@ class Condition extends Collection
     {
         $validator = Validator::make($items, [
             'name' => ['required'],
-            'type' => ['required', 'string', 'in:tax,discount,shipping,other'],
-            'target' => ['required', 'string', 'in:subtotal,total'],
+            'type' => ['required', 'string', Rule::in(config('cart.condition_order.cart'))],
+            'target' => ['required', 'string', Rule::in('price', 'subtotal', 'total')],
         ]);
 
         if ($validator->fails()) {
@@ -38,7 +42,7 @@ class Condition extends Collection
 
     public function getValue(): float
     {
-        return $this->value;
+        return $this->value ?? 0;
     }
 
     /**
@@ -67,10 +71,7 @@ class Condition extends Collection
 
     public function calculate($subtotal)
     {
-        $value = 0;
-        $value = $this->calculateActionValue($subtotal, $value);
-
-        return $value;
+        return $this->calculateActionValue($subtotal, 0);
     }
 
     public function checkActionRule($rule)

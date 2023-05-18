@@ -2,9 +2,13 @@
 
 namespace Ozdemir\Aurora;
 
+use Carbon\Traits\Serialization;
+use Laravel\SerializableClosure\SerializableClosure;
 use Ozdemir\Aurora\Storage\StorageInterface;
+use Symfony\Component\VarDumper\VarDumper;
 
 class Cart
+
 {
     /**
      * @var CartCollection
@@ -19,12 +23,12 @@ class Cart
     /**
      * @var array|mixed|string[]
      */
-    protected array $conditionsOrder = ['discount', 'other', 'tax', 'shipping'];
+    protected array $conditionsOrder;
 
     /**
      * @var array|mixed|string[]
      */
-    protected array $itemConditionsOrder = ['discount', 'other', 'tax', 'shipping'];
+    protected array $itemConditionsOrder;
 
     /**
      * @var StorageInterface
@@ -41,6 +45,7 @@ class Cart
      */
     private array $config;
 
+
     public function __construct(StorageInterface $storage, $dispatcher, $config)
     {
         $this->storage = $storage;
@@ -50,13 +55,18 @@ class Cart
         $this->items = $this->storage->get('cart:items') ?? new CartCollection();
         $this->conditions = $this->storage->get('cart:conditions') ?? new ConditionCollection();
 
-        $this->conditionsOrder = $this->storage->get('cart:conditionsOrder') ?? $this->conditionsOrder;
-        $this->itemConditionsOrder = $this->storage->get('cart:itemConditionsOrder') ?? $this->itemConditionsOrder;
+        $this->conditionsOrder = $this->storage->get('cart:conditionsOrder') ?? config('cart.condition_order.cart');
+        $this->itemConditionsOrder = $this->storage->get('cart:itemConditionsOrder') ?? config('cart.condition_order.item');
     }
 
     public function clone(StorageInterface $storage, $dispatcher = null, $config = null): Cart
     {
         return new self($storage, $dispatcher ?? $this->dispatcher, $config ?? $this->config);
+    }
+
+    public function self(): static
+    {
+        return $this;
     }
 
     public function getInstanceKey()
@@ -92,6 +102,7 @@ class Cart
         $this->items->updateOrAdd($cartItem);
 
         $this->updateItemStorage();
+        $this->updateConditionPrice();
 
         $this->emit('added');
 
@@ -167,21 +178,34 @@ class Cart
         return $this->items->isEmpty();
     }
 
-    public function total()
+    public function getItemSubTotal()
     {
-        $subtotal = $this->subtotal();
-        if ($this->quantity()) {
-            foreach ($this->conditions() as $condition) {
-                $subtotal += $condition->calculate($subtotal);
-            }
-        }
-
-        return $subtotal;
+        return $this->items->sum(fn($item) => $item->subtotal());
     }
 
     public function subtotal()
     {
-        return $this->items->sum(fn ($item) => $item->subtotal());
+        return floatval($this->calculateConditions($this->getItemSubTotal(), 'subtotal'));
+    }
+
+    public function total()
+    {
+        return floatval($this->calculateConditions($this->subtotal(), 'total'));
+    }
+
+    /**
+     * @param mixed $subtotal
+     * @return mixed
+     */
+    public function calculateConditions(mixed $subtotal, string $target): mixed
+    {
+        if ($this->quantity()) {
+            foreach ($this->conditions(target: $target) as $condition) {
+                $subtotal += $condition->value;
+            }
+        }
+
+        return $subtotal;
     }
 
     public function quantity()
@@ -191,7 +215,7 @@ class Cart
 
     public function weight()
     {
-        return $this->items->sum(fn ($item) => $item->weight() * $item->quantity);
+        return $this->items->sum(fn($item) => $item->weight() * $item->quantity);
     }
 
     public function clear()
@@ -202,6 +226,8 @@ class Cart
 
         $this->conditions = new ConditionCollection();
         $this->updateConditionStorage();
+        $this->updateConditionPrice();
+
         $this->emit('cleared');
 
         return $this;
@@ -218,10 +244,20 @@ class Cart
 
     public function condition(Condition $condition)
     {
+        if (!in_array($condition->getTarget(), ['total', 'subtotal'])) {
+            throw new \Exception("The target for the condition can only be a subtotal or price.");
+        }
         $this->conditions->put($condition->getName(), $condition);
         $this->updateConditionStorage();
+        $this->updateConditionPrice();
 
         return $this;
+    }
+
+    public function updateConditionPrice()
+    {
+        $this->conditions(target: 'subtotal')->calculateSubTotal($this->getItemSubTotal());
+        $this->conditions(target: 'total')->calculateSubTotal($this->subtotal());
     }
 
     public function hasCondition($name)
@@ -233,6 +269,7 @@ class Cart
     {
         $this->conditions->pull($name);
         $this->updateConditionStorage();
+        $this->updateConditionPrice();
     }
 
     public function itemConditions($type = null): ConditionCollection
@@ -241,7 +278,7 @@ class Cart
             ->pluck('conditions')
             ->flatten()
             ->groupBy('name')
-            ->map(function($conditions) {
+            ->map(function ($conditions) {
                 $condition = $conditions->first();
                 $condition->value = $conditions->sum('value');
 
@@ -251,12 +288,12 @@ class Cart
             ->filterType($type);
     }
 
-    public function conditions($type = null): ConditionCollection
+    public function conditions($type = null, $target = null): ConditionCollection
     {
         return $this->conditions
             ->sortByOrder($this->getConditionsOrder())
-            ->calculateSubTotal($this->subtotal())
-            ->filterType($type);
+            ->filterType($type)
+            ->filterTarget($target);
     }
 
     /**
@@ -280,25 +317,22 @@ class Cart
      */
     public function setConditionsOrder(array $conditionsOrder): void
     {
-        // todo : validation..
         $this->storage->put('cart:conditionsOrder', $conditionsOrder);
-
         $this->conditionsOrder = $conditionsOrder;
+
+        $this->updateConditionPrice();
     }
 
     /**
      * @param string[] $itemConditionsOrder
      */
-    public function setItemConditionsOrder(array $itemConditionsOrder, $updateExisting = true): void
+    public function setItemConditionsOrder(array $itemConditionsOrder): void
     {
-        // todo : validation..
         $this->storage->put('cart:itemConditionsOrder', $itemConditionsOrder);
 
         $this->itemConditionsOrder = $itemConditionsOrder;
 
-        if ($updateExisting) {
-            $this->items()->each->setItemConditionsOrder($itemConditionsOrder);
-        }
+        $this->items()->each->setItemConditionsOrder($itemConditionsOrder);
     }
 
     private function updateItemStorage()

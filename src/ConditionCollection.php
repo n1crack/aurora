@@ -3,6 +3,7 @@
 namespace Ozdemir\Aurora;
 
 use Illuminate\Support\Collection;
+use Symfony\Component\VarDumper\VarDumper;
 
 class ConditionCollection extends Collection
 {
@@ -24,5 +25,10 @@ class ConditionCollection extends Collection
     public function filterType($type)
     {
         return $this->when($type, fn ($conditions) => $conditions->where('type', $type));
+    }
+
+    public function filterTarget($target)
+    {
+        return $this->when($target, fn($conditions) => $conditions->where('target', $target));
     }
 }

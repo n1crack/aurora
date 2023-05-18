@@ -147,8 +147,8 @@ it('can sum total cart item prices', function() {
     ]);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::total())->toBe(530);
-    expect(Cart::subtotal())->toBe(530);
+    expect(Cart::total())->toBe(530.0);
+    expect(Cart::subtotal())->toBe(530.0);
     expect(Cart::weight())->toBe(10);
 });
 
@@ -169,7 +169,7 @@ it('can clear cart ', function() {
 
     expect(Cart::isEmpty())->toBeTrue();
     expect(Cart::items())->toHaveCount(0);
-    expect(Cart::total())->toBe(0);
+    expect(Cart::total())->toBe(0.0);
     expect(Cart::weight())->toBe(0);
 });
 
@@ -191,7 +191,7 @@ it('can remove item from the cart', function() {
     ]);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::total())->toBe(530);
+    expect(Cart::total())->toBe(530.0);
     expect(Cart::quantity())->toBe(3);
     expect(Cart::weight())->toBe(10);
 
@@ -199,8 +199,8 @@ it('can remove item from the cart', function() {
     Cart::remove($item->hash());
 
     expect(Cart::items())->toHaveCount(1);
-    expect(Cart::total())->toBe(60);
-    expect(Cart::subtotal())->toBe(60);
+    expect(Cart::total())->toBe(60.0);
+    expect(Cart::subtotal())->toBe(60.0);
     expect(Cart::quantity())->toBe(2);
     expect(Cart::weight())->toBe(2);
 });
@@ -223,7 +223,7 @@ it('can sync the items', function() {
     ]);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::total())->toBe(530);
+    expect(Cart::total())->toBe(530.0);
     expect(Cart::quantity())->toBe(3);
     expect(Cart::weight())->toBe(10);
 
@@ -244,7 +244,7 @@ it('can sync the items', function() {
     ]);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::total())->toBe(1510);
+    expect(Cart::total())->toBe(1510.0);
     expect(Cart::quantity())->toBe(12);
     expect(Cart::weight())->toBe(20);
 });
@@ -271,7 +271,7 @@ it('can update the items', function() {
     expect($item->name)->toBe('Updated T-Shirt');
     expect($item->quantity)->toBe(5);
     expect($item->weight())->toBe(0.5);
-    expect($item->price())->toBe(35);
+    expect($item->price())->toBe(35.0);
 
     expect(Cart::items())->toHaveCount(1);
     expect(Cart::quantity())->toBe(5);
@@ -294,7 +294,8 @@ it('can update only quantity if the second param is integer', function() {
     Cart::update($item->hash(), 20);
 
     expect($item->quantity)->toBe(20);
-    expect(Cart::total())->toBe(600);
+    expect(Cart::subtotal())->toBe(600.0);
+    expect(Cart::total())->toBe(600.0);
     expect(Cart::items())->toHaveCount(1);
 });
 
