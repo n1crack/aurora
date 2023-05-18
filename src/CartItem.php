@@ -86,7 +86,8 @@ class CartItem extends Collection
         $this->quantity -= $value;
     }
 
-    public function getPriceWithoutConditions(){
+    public function getPriceWithoutConditions()
+    {
         return floatval($this->price + array_sum(Arr::pluck($this->attributes(), 'price')));
     }
 
@@ -103,8 +104,6 @@ class CartItem extends Collection
 
         return floatval($subtotal);
     }
-
-
 
     public function condition(Condition $condition)
     {

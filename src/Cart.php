@@ -2,13 +2,9 @@
 
 namespace Ozdemir\Aurora;
 
-use Carbon\Traits\Serialization;
-use Laravel\SerializableClosure\SerializableClosure;
 use Ozdemir\Aurora\Storage\StorageInterface;
-use Symfony\Component\VarDumper\VarDumper;
 
 class Cart
-
 {
     /**
      * @var CartCollection
@@ -44,7 +40,6 @@ class Cart
      * @var array
      */
     private array $config;
-
 
     public function __construct(StorageInterface $storage, $dispatcher, $config)
     {
@@ -180,7 +175,7 @@ class Cart
 
     public function getItemSubTotal()
     {
-        return $this->items->sum(fn($item) => $item->subtotal());
+        return $this->items->sum(fn ($item) => $item->subtotal());
     }
 
     public function subtotal()
@@ -215,7 +210,7 @@ class Cart
 
     public function weight()
     {
-        return $this->items->sum(fn($item) => $item->weight() * $item->quantity);
+        return $this->items->sum(fn ($item) => $item->weight() * $item->quantity);
     }
 
     public function clear()
@@ -278,7 +273,7 @@ class Cart
             ->pluck('conditions')
             ->flatten()
             ->groupBy('name')
-            ->map(function ($conditions) {
+            ->map(function($conditions) {
                 $condition = $conditions->first();
                 $condition->value = $conditions->sum('value');
 

@@ -290,4 +290,3 @@ it('can set condition orders', function() {
     // 333.9 - 5.0 = 328.9
     expect(Cart::total())->toBe(328.9);
 });
-

@@ -3,7 +3,7 @@
 
 use Ozdemir\Aurora\Facades\Cart;
 
-it('can return cart item class when a new item added', function () {
+it('can return cart item class when a new item added', function() {
     expect(Cart::isEmpty())->toBeTrue();
 
     $item = Cart::add([

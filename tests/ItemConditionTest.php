@@ -2,7 +2,7 @@
 
 use Ozdemir\Aurora\Facades\Cart;
 
-it('can change the item price or subtotal based on the condition', function () {
+it('can change the item price or subtotal based on the condition', function() {
     expect(Cart::isEmpty())->toBeTrue();
 
     $item = Cart::add([

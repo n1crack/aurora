@@ -8,7 +8,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Laravel\SerializableClosure\SerializableClosure;
 use Ozdemir\Aurora\Traits\CollectionArrayAccess;
-use Symfony\Component\VarDumper\VarDumper;
 
 class Condition extends Collection
 {

@@ -4,7 +4,7 @@ use Laravel\SerializableClosure\SerializableClosure;
 use Ozdemir\Aurora\Condition;
 use Ozdemir\Aurora\Facades\Cart;
 
-it('can serialize the current', function () {
+it('can serialize the current', function() {
 
     $condition = new Condition([
         'name' => 'Condition',
@@ -14,7 +14,7 @@ it('can serialize the current', function () {
     $condition->setActions([
         [
             'value' => '125',
-            'rules' => serialize(new SerializableClosure(fn() => Cart::subtotal() > 50)),
+            'rules' => serialize(new SerializableClosure(fn () => Cart::subtotal() > 50)),
         ],
     ]);
     Cart::condition($condition);
@@ -35,7 +35,7 @@ it('can serialize the current', function () {
     expect(Cart::serialize())->toBeString();
 });
 
-it('can unserialize from serialized string', function () {
+it('can unserialize from serialized string', function() {
     expect(Cart::isEmpty())->toBeTrue();
     Cart::add([
         'id' => 'tshirt',
@@ -58,7 +58,7 @@ it('can unserialize from serialized string', function () {
     $condition->setActions([
         [
             'value' => '-50%',
-            'rules' => serialize(new SerializableClosure(function () {
+            'rules' => serialize(new SerializableClosure(function() {
                 // we shouldn't check Cart::subtotal() here
                 // since we apply the discount on subtotal.
                 // Instead, we check product subtotal.
@@ -119,7 +119,7 @@ it('can unserialize from serialized string', function () {
     $condition2->setActions([
         [
             'value' => '20',
-            'rules' => serialize(new SerializableClosure(function () {
+            'rules' => serialize(new SerializableClosure(function() {
                 // we can check an item quantity here..
                 return Cart::quantity() < 5;
             })),
