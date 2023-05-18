@@ -27,6 +27,8 @@ class CartItem extends Collection
         parent::__construct($items);
 
         $this->setItemConditionsOrder($itemConditionsOrder);
+        $this->calculateConditionPrices();
+
 
         $this->put('hash', $this->hash());
     }
@@ -37,6 +39,7 @@ class CartItem extends Collection
     public function setItemConditionsOrder(array $itemConditionsOrder): void
     {
         $this->itemConditionsOrder = $itemConditionsOrder;
+        $this->calculateConditionPrices();
     }
 
     /**
@@ -83,38 +86,43 @@ class CartItem extends Collection
         $this->quantity -= $value;
     }
 
-    public function price()
+    public function getPriceWithoutConditions()
     {
-        return $this->price + array_sum(Arr::pluck($this->attributes(), 'price'));
+        return floatval($this->price + array_sum(Arr::pluck($this->attributes(), 'price')));
     }
 
-    public function subtotal()
+    public function price(): float
+    {
+        return $this->calculateConditions($this->getPriceWithoutConditions(), 'price');
+    }
+
+    public function subtotal(): float
     {
         $subtotal = $this->price() * $this->quantity;
 
-        foreach ($this->conditions() as $condition) {
-            $subtotal += $condition->calculate($subtotal);
-        }
+        $subtotal = $this->calculateConditions($subtotal, 'subtotal');
 
-        return $subtotal;
+        return floatval($subtotal);
     }
 
     public function condition(Condition $condition)
     {
+        if (!in_array($condition->getTarget(), ['price', 'subtotal'])) {
+            throw new \Exception("The target for the condition can only be a price or subtotal.");
+        }
         $this->conditions->put($condition->getName(), $condition);
+
+        $this->calculateConditionPrices();
 
         return $this;
     }
 
-    public function conditions($type = null)
+    public function conditions($type = null, $target = null)
     {
-        $subtotal = $this->price() * $this->quantity;
-        $conditions = $this->conditions
+        return $this->conditions
             ->sortByOrder($this->getConditionsOrder())
-            ->calculateSubTotal($subtotal)
-            ->filterType($type);
-
-        return $conditions;
+            ->filterType($type)
+            ->filterTarget($target);
     }
 
     public function weight()
@@ -145,5 +153,27 @@ class CartItem extends Collection
     private function setAttributes($attributes)
     {
         return collect($attributes)->map(fn ($item) => new CartAttribute($item));
+    }
+
+    /**
+     * @param float|int $subtotal
+     * @return float|int
+     */
+    public function calculateConditions(float|int $subtotal, string $target): int|float
+    {
+        foreach ($this->conditions(target: $target) as $condition) {
+            $subtotal += $condition->value;
+        }
+
+        return $subtotal;
+    }
+
+    /**
+     * @return void
+     */
+    public function calculateConditionPrices(): void
+    {
+        $this->conditions(target: 'price')->calculateSubTotal($this->getPriceWithoutConditions());
+        $this->conditions(target: 'subtotal')->calculateSubTotal($this->price() * $this->quantity);
     }
 }

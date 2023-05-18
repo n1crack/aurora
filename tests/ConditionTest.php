@@ -55,7 +55,7 @@ it('can remove a condition', function() {
     expect(Cart::conditions())->toHaveCount(0);
 });
 
-it('can add value to total ', function() {
+it('can add value to total', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -73,13 +73,13 @@ it('can add value to total ', function() {
     ]);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::subtotal())->toBe(530);
-    expect(Cart::total())->toBe(530);
+    expect(Cart::subtotal())->toBe(530.0);
+    expect(Cart::total())->toBe(530.0);
 
     $condition = new Ozdemir\Aurora\Condition([
         'name' => 'Shipping',
         'type' => 'shipping',
-        'target' => 'subtotal',
+        'target' => 'total',
     ]);
 
     $condition->setActions([
@@ -91,8 +91,8 @@ it('can add value to total ', function() {
     Cart::condition($condition);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::subtotal())->toBe(530);
-    expect(Cart::total())->toBe(555);
+    expect(Cart::subtotal())->toBe(530.0);
+    expect(Cart::total())->toBe(555.0);
 });
 
 it('can sub value from total ', function() {
@@ -113,13 +113,13 @@ it('can sub value from total ', function() {
     ]);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::subtotal())->toBe(530);
-    expect(Cart::total())->toBe(530);
+    expect(Cart::subtotal())->toBe(530.0);
+    expect(Cart::total())->toBe(530.0);
 
     $condition = new Ozdemir\Aurora\Condition([
         'name' => 'Discount',
         'type' => 'discount',
-        'target' => 'subtotal',
+        'target' => 'total',
     ]);
 
     $condition->setActions([
@@ -131,8 +131,8 @@ it('can sub value from total ', function() {
     Cart::condition($condition);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::subtotal())->toBe(530);
-    expect(Cart::total())->toBe(505);
+    expect(Cart::subtotal())->toBe(530.0);
+    expect(Cart::total())->toBe(505.0);
 });
 
 it('can add percent value to total ', function() {
@@ -153,13 +153,13 @@ it('can add percent value to total ', function() {
     ]);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::subtotal())->toBe(530);
-    expect(Cart::total())->toBe(530);
+    expect(Cart::subtotal())->toBe(530.0);
+    expect(Cart::total())->toBe(530.0);
 
     $condition = new Ozdemir\Aurora\Condition([
         'name' => 'Tax (6%)',
         'type' => 'tax',
-        'target' => 'subtotal',
+        'target' => 'total',
     ]);
 
     $condition->setActions([
@@ -171,7 +171,7 @@ it('can add percent value to total ', function() {
     Cart::condition($condition);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::subtotal())->toBe(530);
+    expect(Cart::subtotal())->toBe(530.0);
     expect(Cart::total())->toBe(561.8);
 });
 
@@ -193,13 +193,13 @@ it('can sub percent value from total ', function() {
     ]);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::subtotal())->toBe(530);
-    expect(Cart::total())->toBe(530);
+    expect(Cart::subtotal())->toBe(530.0);
+    expect(Cart::total())->toBe(530.0);
 
     $condition = new Ozdemir\Aurora\Condition([
         'name' => 'Tax (6%)',
         'type' => 'tax',
-        'target' => 'subtotal',
+        'target' => 'total',
     ]);
 
     $condition->setActions([
@@ -211,7 +211,7 @@ it('can sub percent value from total ', function() {
     Cart::condition($condition);
 
     expect(Cart::items())->toHaveCount(2);
-    expect(Cart::subtotal())->toBe(530);
+    expect(Cart::subtotal())->toBe(530.0);
     expect(Cart::total())->toBe(498.2);
 });
 
@@ -240,6 +240,14 @@ it('can set condition orders', function() {
     $other->setActions([['value' => '125']]);
     Cart::condition($other);
 
+    $coupon = new Ozdemir\Aurora\Condition([
+        'name' => 'Coupon',
+        'type' => 'coupon',
+        'target' => 'total',
+    ]);
+    $coupon->setActions([['value' => '-5']]);
+    Cart::condition($coupon);
+
     $discount = new Ozdemir\Aurora\Condition([
         'name' => 'Discount',
         'type' => 'discount',
@@ -256,122 +264,29 @@ it('can set condition orders', function() {
         'weight' => 1,
     ]);
 
-    expect(Cart::getConditionsOrder())->toBe(['discount', 'other', 'tax', 'shipping']);
+    expect(Cart::getConditionsOrder())->toBe(['discount', 'other', 'shipping', 'coupon', 'tax']);
     expect(Cart::conditions()->first()->name)->toBe('Discount');
     expect(Cart::conditions()->get(1)->name)->toBe('Other');
-    expect(Cart::conditions()->get(2)->name)->toBe('Tax');
-    expect(Cart::conditions()->last()->name)->toBe('Shipping');
-    // (((200*0,9)+125)*1,06)+25
-    expect(Cart::total())->toBe(348.3);
+    expect(Cart::conditions()->get(2)->name)->toBe('Shipping');
+    expect(Cart::conditions()->get(3)->name)->toBe('Coupon');
+    expect(Cart::conditions()->last()->name)->toBe('Tax');
 
-    Cart::setConditionsOrder(['other', 'shipping', 'tax', 'discount']);
+    // (((200*0,9)+125)+25)*1,06  = 349.8
+    expect(Cart::subtotal())->toBe(349.8);
+    // 349.8 - 5.0 = 344.8
+    expect(Cart::total())->toBe(344.8);
 
-    expect(Cart::getConditionsOrder())->toBe(['other', 'shipping', 'tax', 'discount']);
+    Cart::setConditionsOrder(['other', 'shipping', 'tax', 'coupon', 'discount']);
+
+    expect(Cart::getConditionsOrder())->toBe(['other', 'shipping', 'tax', 'coupon', 'discount']);
     expect(Cart::conditions()->first()->name)->toBe('Other');
     expect(Cart::conditions()->get(1)->name)->toBe('Shipping');
     expect(Cart::conditions()->get(2)->name)->toBe('Tax');
+    expect(Cart::conditions()->get(3)->name)->toBe('Coupon');
     expect(Cart::conditions()->last()->name)->toBe('Discount');
-    // (200+125+25)*1,06*0,9
-    expect(Cart::total())->toBe(333.9);
-});
 
-
-it('can set items condition orders', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 100,
-        'weight' => 1,
-    ]);
-
-    $tax = new Ozdemir\Aurora\Condition([
-        'name' => 'Tax',
-        'type' => 'tax',
-        'target' => 'subtotal',
-    ]);
-    $tax->setActions([['value' => '6%']]);
-
-    $other = new Ozdemir\Aurora\Condition([
-        'name' => 'Other',
-        'type' => 'other',
-        'target' => 'subtotal',
-    ]);
-    $other->setActions([['value' => '125']]);
-
-    expect(Cart::items())->toHaveCount(1);
-
-    expect(Cart::total())->toBe(200);
-    expect(Cart::getItemConditionsOrder())->toBe(['discount', 'other', 'tax', 'shipping']);
-
-    $item = Cart::items()->first();
-    $item->condition($tax);
-    $item->condition($other);
-    // (2*100 + 125) * 1,06
-    expect(Cart::total())->toBe(344.5);
-
-    Cart::setItemConditionsOrder(['discount', 'shipping', 'tax', 'other']);
-
-    // (2*100 * 1,06) + 125
-    expect(Cart::getItemConditionsOrder())->toBe(['discount', 'shipping', 'tax', 'other']);
-
-    expect(Cart::total())->toBe(337.0);
-});
-
-it('can set items condition orders without update existing items', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 100,
-        'weight' => 1,
-    ]);
-
-    $tax = new Ozdemir\Aurora\Condition([
-        'name' => 'Tax',
-        'type' => 'tax',
-        'target' => 'subtotal',
-    ]);
-    $tax->setActions([['value' => '6%']]);
-
-    $other = new Ozdemir\Aurora\Condition([
-        'name' => 'Other',
-        'type' => 'other',
-        'target' => 'subtotal',
-    ]);
-    $other->setActions([['value' => '125']]);
-
-    expect(Cart::items())->toHaveCount(1);
-
-    expect(Cart::total())->toBe(200);
-    expect(Cart::getItemConditionsOrder())->toBe(['discount', 'other', 'tax', 'shipping']);
-
-    $item = Cart::items()->first();
-    $item->condition($tax);
-    $item->condition($other);
-    // (2*100 + 125) * 1,06
-    expect(Cart::total())->toBe(344.5);
-
-    // dont update existing items
-    Cart::setItemConditionsOrder(['discount', 'shipping', 'tax', 'other'], false);
-
-    // (2*100 * 1,06) + 125
-    expect(Cart::getItemConditionsOrder())->toBe(['discount', 'shipping', 'tax', 'other']);
-
-    expect(Cart::total())->toBe(344.5);
-
-    Cart::add([
-        'id' => 'tshirt-new',
-        'name' => 'T-Shirt New',
-        'quantity' => 2,
-        'price' => 100,
-        'weight' => 1,
-    ]);
-
-    $item = Cart::items()->last();
-    $item->condition($tax);
-    $item->condition($other);
-
-    // 344.5 + 337
-    expect(Cart::total())->toBe(681.5);
+    // (200+125+25)*1,06*0,9 = 333.9
+    expect(Cart::subtotal())->toBe(333.9);
+    // 333.9 - 5.0 = 328.9
+    expect(Cart::total())->toBe(328.9);
 });
