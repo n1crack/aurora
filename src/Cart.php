@@ -97,7 +97,6 @@ class Cart
         $this->items->updateOrAdd($cartItem);
 
         $this->updateItemStorage();
-        $this->updateConditionPrice();
 
         $this->emit('added');
 
@@ -173,6 +172,12 @@ class Cart
         return $this->items->isEmpty();
     }
 
+
+    public function getItemSubTotalBasePrice()
+    {
+        return $this->items->sum(fn (CartItem $item) => $item->getPriceWithoutConditions() * $item->quantity);
+    }
+
     public function getItemSubTotal()
     {
         return $this->items->sum(fn ($item) => $item->subtotal());
@@ -221,7 +226,6 @@ class Cart
 
         $this->conditions = new ConditionCollection();
         $this->updateConditionStorage();
-        $this->updateConditionPrice();
 
         $this->emit('cleared');
 
@@ -244,13 +248,14 @@ class Cart
         }
         $this->conditions->put($condition->getName(), $condition);
         $this->updateConditionStorage();
-        $this->updateConditionPrice();
 
         return $this;
     }
 
     public function updateConditionPrice()
     {
+        $this->items()->each->calculateConditionPrices();
+
         $this->conditions(target: 'subtotal')->calculateSubTotal($this->getItemSubTotal());
         $this->conditions(target: 'total')->calculateSubTotal($this->subtotal());
     }
@@ -264,14 +269,13 @@ class Cart
     {
         $this->conditions->pull($name);
         $this->updateConditionStorage();
-        $this->updateConditionPrice();
     }
 
-    public function itemConditions($type = null): ConditionCollection
+    public function itemConditions($type = null)
     {
         return Cart::items()
             ->pluck('conditions')
-            ->flatten()
+            ->flatten(1)
             ->groupBy('name')
             ->map(function($conditions) {
                 $condition = $conditions->first();
@@ -332,11 +336,15 @@ class Cart
 
     private function updateItemStorage()
     {
+        $this->updateConditionPrice();
+
         $this->storage->put('cart:items', $this->items);
     }
 
     private function updateConditionStorage()
     {
+        $this->updateConditionPrice();
+
         $this->storage->put('cart:conditions', $this->conditions);
     }
 
