@@ -172,7 +172,6 @@ class Cart
         return $this->items->isEmpty();
     }
 
-
     public function getItemSubTotalBasePrice()
     {
         return $this->items->sum(fn (CartItem $item) => $item->getPriceWithoutConditions() * $item->quantity);
