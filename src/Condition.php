@@ -6,7 +6,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Laravel\SerializableClosure\SerializableClosure;
 use Ozdemir\Aurora\Traits\CollectionArrayAccess;
 
 class Condition extends Collection
