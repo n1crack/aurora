@@ -4,7 +4,7 @@ namespace Ozdemir\Aurora;
 
 use Ozdemir\Aurora\Storage\StorageInterface;
 
-class Cart
+class Cart implements \Serializable
 {
     /**
      * @var CartCollection
@@ -349,16 +349,29 @@ class Cart
 
     public function serialize()
     {
-        return serialize([
+        return serialize($this->__serialize());
+    }
+
+    public function unserialize($string)
+    {
+
+        $data = unserialize($string, [CartCollection::class, ConditionCollection::class, StorageInterface::class]);
+
+        $this->__unserialize($data);
+    }
+
+    public function __serialize(): array
+    {
+        return [
             $this->items,
             $this->conditions,
             $this->conditionsOrder,
             $this->itemConditionsOrder,
             $this->storage,
-        ]);
+        ];
     }
 
-    public function unserialize($string)
+    public function __unserialize(array $data): void
     {
         [
             $this->items,
@@ -366,8 +379,6 @@ class Cart
             $this->conditionsOrder,
             $this->itemConditionsOrder,
             $this->storage,
-        ] = unserialize($string, [CartCollection::class, ConditionCollection::class, StorageInterface::class]);
-
-        return $this;
+        ] = $data;
     }
 }
