@@ -83,10 +83,6 @@ class Condition extends Collection
             return $rule();
         }
 
-        if (is_string($rule) && is_callable(unserialize($rule, [SerializableClosure::class]))) {
-            return unserialize($rule, [SerializableClosure::class])();
-        }
-
         if (is_bool($rule)) {
             return $rule;
         }
@@ -96,6 +92,10 @@ class Condition extends Collection
     {
         if ($subtotal <= 0) {
             return 0;
+        }
+
+        if (is_callable($actionVal)) {
+            return $actionVal();
         }
 
         $percentage = Str::endsWith($actionVal, '%');
