@@ -15,7 +15,7 @@ class CartServiceProvider extends ServiceProvider
 
         $defaultInstance = config('cart.instance');
 
-        $this->app->singleton($defaultInstance, function ($app) use ($defaultInstance) {
+        $this->app->singleton($defaultInstance, function($app) use ($defaultInstance) {
             $storageClass = config('cart.storage');
 
             $storage = new $storageClass($defaultInstance);
@@ -23,6 +23,7 @@ class CartServiceProvider extends ServiceProvider
             $dispatcher = $app->get('events');
 
             $cartClass = config('cart.cart_class');
+
             return new $cartClass($storage, $dispatcher, config('cart') ?? []);
         });
     }

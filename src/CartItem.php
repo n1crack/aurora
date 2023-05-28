@@ -154,7 +154,7 @@ class CartItem extends Collection
 
     private function setAttributes($attributes)
     {
-        return collect($attributes)->map(fn($item) => new CartAttribute($item));
+        return collect($attributes)->map(fn ($item) => new CartAttribute($item));
     }
 
     /**

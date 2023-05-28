@@ -174,12 +174,12 @@ class Cart implements \Serializable
 
     public function getItemSubTotalBasePrice()
     {
-        return $this->items->sum(fn(CartItem $item) => $item->getPriceWithoutConditions() * $item->quantity);
+        return $this->items->sum(fn (CartItem $item) => $item->getPriceWithoutConditions() * $item->quantity);
     }
 
     public function getItemSubTotal()
     {
-        return round($this->items->sum(fn($item) => $item->subtotal()), $this->config['precision']);
+        return round($this->items->sum(fn ($item) => $item->subtotal()), $this->config['precision']);
     }
 
     public function subtotal()
@@ -214,7 +214,7 @@ class Cart implements \Serializable
 
     public function weight()
     {
-        return $this->items->sum(fn($item) => $item->weight() * $item->quantity);
+        return $this->items->sum(fn ($item) => $item->weight() * $item->quantity);
     }
 
     public function clear()
@@ -276,7 +276,7 @@ class Cart implements \Serializable
             ->pluck('conditions')
             ->flatten(1)
             ->groupBy('name')
-            ->map(function ($conditions) {
+            ->map(function($conditions) {
                 $condition = $conditions->first();
                 $condition->value = $conditions->sum('value');
 
