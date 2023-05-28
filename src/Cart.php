@@ -71,12 +71,12 @@ class Cart implements \Serializable
 
     public function emit($event, ...$args)
     {
-        $this->dispatcher->dispatch($this->getInstanceKey().'.'.$event, ...$args);
+        $this->dispatcher->dispatch($this->getInstanceKey() . '.' . $event, ...$args);
     }
 
     public function listen($event, $callback)
     {
-        $this->dispatcher->listen($this->getInstanceKey().'.'.$event, $callback());
+        $this->dispatcher->listen($this->getInstanceKey() . '.' . $event, $callback());
     }
 
     public function add($data)
@@ -93,7 +93,7 @@ class Cart implements \Serializable
         }
 
         $cartItemClass = $this->config['cart_item'];
-        $cartItem = new $cartItemClass($data, $this->itemConditionsOrder);
+        $cartItem = new $cartItemClass($data, $this->itemConditionsOrder, $this->config);
         $this->items->updateOrAdd($cartItem);
 
         $this->updateItemStorage();
@@ -174,22 +174,22 @@ class Cart implements \Serializable
 
     public function getItemSubTotalBasePrice()
     {
-        return $this->items->sum(fn (CartItem $item) => $item->getPriceWithoutConditions() * $item->quantity);
+        return $this->items->sum(fn(CartItem $item) => $item->getPriceWithoutConditions() * $item->quantity);
     }
 
     public function getItemSubTotal()
     {
-        return $this->items->sum(fn ($item) => $item->subtotal());
+        return round($this->items->sum(fn($item) => $item->subtotal()), $this->config['precision']);
     }
 
     public function subtotal()
     {
-        return floatval($this->calculateConditions($this->getItemSubTotal(), 'subtotal'));
+        return round($this->calculateConditions($this->getItemSubTotal(), 'subtotal'), $this->config['precision']);
     }
 
     public function total()
     {
-        return floatval($this->calculateConditions($this->subtotal(), 'total'));
+        return round($this->calculateConditions($this->subtotal(), 'total'), $this->config['precision']);
     }
 
     /**
@@ -214,7 +214,7 @@ class Cart implements \Serializable
 
     public function weight()
     {
-        return $this->items->sum(fn ($item) => $item->weight() * $item->quantity);
+        return $this->items->sum(fn($item) => $item->weight() * $item->quantity);
     }
 
     public function clear()
@@ -276,7 +276,7 @@ class Cart implements \Serializable
             ->pluck('conditions')
             ->flatten(1)
             ->groupBy('name')
-            ->map(function($conditions) {
+            ->map(function ($conditions) {
                 $condition = $conditions->first();
                 $condition->value = $conditions->sum('value');
 

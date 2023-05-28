@@ -13,11 +13,12 @@ class CartItem extends Collection
     use CollectionArrayAccess;
 
     protected array $itemConditionsOrder;
+    private array $config;
 
     /**
      * @throws Exception
      */
-    public function __construct($items, $itemConditionsOrder)
+    public function __construct($items, $itemConditionsOrder, $config)
     {
         $this->validate($items);
 
@@ -26,15 +27,16 @@ class CartItem extends Collection
 
         parent::__construct($items);
 
+        $this->config = $config;
+
         $this->setItemConditionsOrder($itemConditionsOrder);
         $this->calculateConditionPrices();
-
 
         $this->put('hash', $this->hash());
     }
 
     /**
-     * @param  array  $itemConditionsOrder
+     * @param array $itemConditionsOrder
      */
     public function setItemConditionsOrder(array $itemConditionsOrder): void
     {
@@ -68,7 +70,7 @@ class CartItem extends Collection
         $attr = $this->attributes->pluck('value')->join('-');
         $sku = $this->sku;
 
-        return md5($this->id.$attr.$sku);
+        return md5($this->id . $attr . $sku);
     }
 
     public function increaseQuantity(int $value)
@@ -88,12 +90,12 @@ class CartItem extends Collection
 
     public function getPriceWithoutConditions()
     {
-        return floatval($this->price + array_sum(Arr::pluck($this->attributes(), 'price')));
+        return round($this->price + array_sum(Arr::pluck($this->attributes(), 'price')), $this->config['precision']);
     }
 
     public function price(): float
     {
-        return $this->calculateConditions($this->getPriceWithoutConditions(), 'price');
+        return round($this->calculateConditions($this->getPriceWithoutConditions(), 'price'), $this->config['precision']);
     }
 
     public function subtotal(): float
@@ -102,7 +104,7 @@ class CartItem extends Collection
 
         $subtotal = $this->calculateConditions($subtotal, 'subtotal');
 
-        return floatval($subtotal);
+        return round($subtotal, $this->config['precision']);
     }
 
     public function condition(Condition $condition)
@@ -152,7 +154,7 @@ class CartItem extends Collection
 
     private function setAttributes($attributes)
     {
-        return collect($attributes)->map(fn ($item) => new CartAttribute($item));
+        return collect($attributes)->map(fn($item) => new CartAttribute($item));
     }
 
     /**
