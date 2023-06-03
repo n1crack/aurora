@@ -32,7 +32,7 @@ class Cart implements \Serializable
     private StorageInterface $storage;
 
     /**
-     * @var array $meta
+     * @var array
      */
     private array $meta;
 
