@@ -32,6 +32,11 @@ class Cart implements \Serializable
     private StorageInterface $storage;
 
     /**
+     * @var array $meta
+     */
+    private array $meta;
+
+    /**
      * @var
      */
     private $dispatcher;
@@ -52,6 +57,7 @@ class Cart implements \Serializable
 
         $this->conditionsOrder = $this->storage->get('cart:conditionsOrder') ?? config('cart.condition_order.cart');
         $this->itemConditionsOrder = $this->storage->get('cart:itemConditionsOrder') ?? config('cart.condition_order.item');
+        $this->meta = $this->storage->get('cart:meta') ?? [];
     }
 
     public function clone(StorageInterface $storage, $dispatcher = null, $config = null): Cart
@@ -331,6 +337,20 @@ class Cart implements \Serializable
         $this->itemConditionsOrder = $itemConditionsOrder;
 
         $this->items()->each->setItemConditionsOrder($itemConditionsOrder);
+    }
+
+    /**
+     * @param string[] $itemConditionsOrder
+     */
+    public function setMeta(string $key, mixed $data): void
+    {
+        $this->meta[$key] = $data;
+        $this->storage->put('cart:meta', $this->meta);
+    }
+
+    public function getMeta(string $key, mixed $default): mixed
+    {
+        return $this->meta[$key] ?? $default;
     }
 
     private function updateItemStorage()
