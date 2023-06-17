@@ -4,16 +4,16 @@ use Illuminate\Support\Collection;
 use Ozdemir\Aurora\CartAttribute;
 use Ozdemir\Aurora\Facades\Cart;
 
-it('is empty as default', function () {
+it('is empty as default', function() {
     expect(Cart::isEmpty())->toBeTrue();
 });
 
-it('is can get instance key for a guest user', function () {
+it('is can get instance key for a guest user', function() {
     expect(Cart::getInstanceKey())->toBe('cart');
 });
 
-it('is can get instance key for a logged-in user', function () {
-    $user = (new \Illuminate\Foundation\Auth\User)->forceFill([
+it('is can get instance key for a logged-in user', function() {
+    $user = (new \Illuminate\Foundation\Auth\User())->forceFill([
         'id' => 123,
         'name' => 'User name',
         'email' => 'email@example.com',
@@ -28,7 +28,7 @@ it('is can get instance key for a logged-in user', function () {
 });
 
 
-it('can add items to Cart', function () {
+it('can add items to Cart', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -40,7 +40,7 @@ it('can add items to Cart', function () {
     expect(Cart::isEmpty())->toBeFalse();
 });
 
-it('can add multiple items to Cart', function () {
+it('can add multiple items to Cart', function() {
     Cart::add([
         [
             'id' => 'tshirt',
@@ -60,7 +60,7 @@ it('can add multiple items to Cart', function () {
     expect(Cart::quantity())->toBe(3);
 });
 
-it('increase items count if the id is same', function () {
+it('increase items count if the id is same', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -78,7 +78,7 @@ it('increase items count if the id is same', function () {
     expect(Cart::quantity())->toBe(2);
 });
 
-it('can add new item instance with the same item id if the item has a stock keeping unit', function () {
+it('can add new item instance with the same item id if the item has a stock keeping unit', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -99,7 +99,7 @@ it('can add new item instance with the same item id if the item has a stock keep
     expect(Cart::quantity())->toBe(2);
 });
 
-it('can have attribute and attribute have to be instance of CartAttribute Class', function () {
+it('can have attribute and attribute have to be instance of CartAttribute Class', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -118,7 +118,7 @@ it('can have attribute and attribute have to be instance of CartAttribute Class'
     expect(Cart::items()->first()->attributes->first()->get('value'))->toBe('red');
 });
 
-it('can add new item instance with the same item id if the item has different attributes without sku', function () {
+it('can add new item instance with the same item id if the item has different attributes without sku', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -145,7 +145,7 @@ it('can add new item instance with the same item id if the item has different at
     expect(Cart::weight())->toBe(0);
 });
 
-it('can sum total cart item prices', function () {
+it('can sum total cart item prices', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -168,7 +168,7 @@ it('can sum total cart item prices', function () {
     expect(Cart::weight())->toBe(10);
 });
 
-it('can clear cart ', function () {
+it('can clear cart ', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -189,7 +189,7 @@ it('can clear cart ', function () {
     expect(Cart::weight())->toBe(0);
 });
 
-it('can remove item from the cart', function () {
+it('can remove item from the cart', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -221,7 +221,7 @@ it('can remove item from the cart', function () {
     expect(Cart::weight())->toBe(2);
 });
 
-it('can sync the items', function () {
+it('can sync the items', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -265,7 +265,7 @@ it('can sync the items', function () {
     expect(Cart::weight())->toBe(20);
 });
 
-it('can update the items', function () {
+it('can update the items', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -293,7 +293,7 @@ it('can update the items', function () {
     expect(Cart::quantity())->toBe(5);
 });
 
-it('can update only quantity if the second param is integer', function () {
+it('can update only quantity if the second param is integer', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -315,7 +315,7 @@ it('can update only quantity if the second param is integer', function () {
     expect(Cart::items())->toHaveCount(1);
 });
 
-it('can get items from hash', function () {
+it('can get items from hash', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -343,7 +343,7 @@ it('can get items from hash', function () {
     expect(Cart::item($item->hash)->attributes->last()->label)->toBe('Small');
 });
 
-it('can initialize a new instance', function () {
+it('can initialize a new instance', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -379,7 +379,7 @@ it('can initialize a new instance', function () {
 });
 
 
-it('can refresh user id after login', function () {
+it('can refresh user id after login', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -393,7 +393,7 @@ it('can refresh user id after login', function () {
     expect(Cart::weight())->toBe(8);
     expect(Cart::getInstanceKey())->toBe('cart');
 
-    $user = (new \Illuminate\Foundation\Auth\User)->forceFill([
+    $user = (new \Illuminate\Foundation\Auth\User())->forceFill([
         'id' => 123,
         'name' => 'Their name',
         'email' => 'email@example.com',
@@ -417,7 +417,7 @@ it('can refresh user id after login', function () {
 });
 
 
-it('can load any session Cart', function () {
+it('can load any session Cart', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -432,7 +432,7 @@ it('can load any session Cart', function () {
     expect(Cart::getInstanceKey())->toBe('cart');
     expect(Cart::getSessionKey())->toBe(session()->getId());
 
-    $user = (new \Illuminate\Foundation\Auth\User)->forceFill([
+    $user = (new \Illuminate\Foundation\Auth\User())->forceFill([
         'id' => 123,
         'name' => 'Their name',
         'email' => 'email@example.com',
@@ -465,7 +465,7 @@ it('can load any session Cart', function () {
 
 });
 
-it('can merge with another session', function () {
+it('can merge with another session', function() {
     Cart::add([
         'id' => 'tshirt',
         'name' => 'T-Shirt',
@@ -480,7 +480,7 @@ it('can merge with another session', function () {
     expect(Cart::getInstanceKey())->toBe('cart');
     expect(Cart::getSessionKey())->toBe(session()->getId());
 
-    $user = (new \Illuminate\Foundation\Auth\User)->forceFill([
+    $user = (new \Illuminate\Foundation\Auth\User())->forceFill([
         'id' => 123,
         'name' => 'Their name',
         'email' => 'email@example.com',
