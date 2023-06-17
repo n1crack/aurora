@@ -464,4 +464,3 @@ it('can load any session Cart', function() {
     expect(Cart::getInstanceKey())->toBe('cart');
 
 });
-
