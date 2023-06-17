@@ -106,9 +106,6 @@ class Cart implements \Serializable
         $this->items = $this->items->merge($oldCart->items());
         $this->updateItemStorage();
 
-        $this->conditions = $this->conditions->merge($oldCart->conditions());
-        $this->updateConditionStorage();
-
         return $this;
     }
 
