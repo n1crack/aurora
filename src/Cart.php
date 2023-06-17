@@ -77,7 +77,7 @@ class Cart implements \Serializable
 
         $session ??= $this->session;
 
-        return new self($session, $storage, $dispatcher ?? $this->dispatcher, $config ?? $this->config);
+        return new static($session, $storage, $dispatcher ?? $this->dispatcher, $config ?? $this->config);
     }
 
     public function self(): static
@@ -92,18 +92,18 @@ class Cart implements \Serializable
 
     public function load(Cart $oldCart): self
     {
-        $this->items = $oldCart->items();
+        $this->items = $oldCart->items;
         $this->updateItemStorage();
 
-        $this->conditions = $oldCart->conditions();
+        $this->conditions = $oldCart->conditions;
         $this->updateConditionStorage();
 
         return $this;
     }
 
-    public function merge(Cart $oldCart): self
+    public function mergeItems(Cart $oldCart): self
     {
-        $this->items = $this->items->merge($oldCart->items());
+        $this->items = $this->items->merge($oldCart->items);
         $this->updateItemStorage();
 
         return $this;
@@ -261,11 +261,10 @@ class Cart implements \Serializable
     {
         $this->emit('clearing');
         $this->items = new CartCollection();
-        $this->updateItemStorage();
-
         $this->conditions = new ConditionCollection();
-        $this->updateConditionStorage();
 
+        $this->updateItemStorage();
+        $this->updateConditionStorage();
         $this->emit('cleared');
 
         return $this;
@@ -286,9 +285,22 @@ class Cart implements \Serializable
             throw new \Exception("The target for the condition can only be a subtotal or price.");
         }
         $this->conditions->put($condition->getName(), $condition);
+
         $this->updateConditionStorage();
 
         return $this;
+    }
+
+    public function setConditions(ConditionCollection $conditions)
+    {
+        $this->conditions = $conditions;
+
+        $this->updateConditionStorage();
+    }
+
+    public function getConditions()
+    {
+        return $this->conditions;
     }
 
     public function updateConditionPrice()
@@ -396,7 +408,7 @@ class Cart implements \Serializable
         $this->putStorage('cart:items', $this->items);
     }
 
-    private function updateConditionStorage()
+    public function updateConditionStorage()
     {
         $this->updateConditionPrice();
 
@@ -411,6 +423,7 @@ class Cart implements \Serializable
     public function loadSession($key)
     {
         $this->session = $key;
+
         $this->initCart();
     }
 
