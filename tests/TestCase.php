@@ -17,7 +17,9 @@ class TestCase extends Orchestra
         $this->app->singleton('laravel-cart', function($app) {
             $storage = new ArrayStorage('cart');
 
-            return new Cart($storage, new Dispatcher(), config('cart') ?? []);
+            $session = Cart::defaultSessionKey();
+
+            return new Cart($session, $storage, new Dispatcher(), config('cart') ?? []);
         });
     }
 

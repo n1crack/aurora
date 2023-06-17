@@ -24,7 +24,9 @@ class CartServiceProvider extends ServiceProvider
 
             $cartClass = config('cart.cart_class');
 
-            return new $cartClass($storage, $dispatcher, config('cart') ?? []);
+            $session = $cartClass::defaultSessionKey();
+
+            return new $cartClass($session, $storage, $dispatcher, config('cart') ?? []);
         });
     }
 }

@@ -49,13 +49,14 @@ class Cart implements \Serializable
 
     private string $session;
 
-    public function __construct(StorageInterface $storage, $dispatcher, $config)
+    public function __construct(string $session, StorageInterface $storage, $dispatcher, $config)
     {
         $this->storage = $storage;
 
         $this->dispatcher = $dispatcher;
         $this->config = array_merge(config('cart'), $config);
-        $this->session = self::defaultUserInstanceKey();
+
+        $this->session = $session;
 
         $this->initCart();
     }
@@ -70,11 +71,13 @@ class Cart implements \Serializable
         $this->meta = $this->getStorage('cart:meta') ?? [];
     }
 
-    public function clone(StorageInterface $storage = null, $dispatcher = null, $config = null): Cart
+    public function clone(string $session = null, StorageInterface $storage = null, $dispatcher = null, $config = null): Cart
     {
         $storage ??= $this->storage;
 
-        return new self($storage, $dispatcher ?? $this->dispatcher, $config ?? $this->config);
+        $session ??= $this->session;
+
+        return new self($session, $storage, $dispatcher ?? $this->dispatcher, $config ?? $this->config);
     }
 
     public function self(): static
@@ -403,7 +406,7 @@ class Cart implements \Serializable
         $this->putStorage('cart:conditions', $this->conditions);
     }
 
-    public static function defaultUserInstanceKey(): string
+    public static function defaultSessionKey(): string
     {
         return Auth::check() ? Auth::id() : session()->getId();
     }
