@@ -2,6 +2,7 @@
 
 namespace Ozdemir\Aurora;
 
+use Illuminate\Support\Facades\Auth;
 use Ozdemir\Aurora\Storage\StorageInterface;
 
 class Cart implements \Serializable
@@ -46,22 +47,33 @@ class Cart implements \Serializable
      */
     private array $config;
 
+    private string $session;
+
     public function __construct(StorageInterface $storage, $dispatcher, $config)
     {
         $this->storage = $storage;
+
         $this->dispatcher = $dispatcher;
         $this->config = array_merge(config('cart'), $config);
+        $this->session = self::defaultUserInstanceKey();
 
-        $this->items = $this->storage->get('cart:items') ?? new CartCollection();
-        $this->conditions = $this->storage->get('cart:conditions') ?? new ConditionCollection();
-
-        $this->conditionsOrder = $this->storage->get('cart:conditionsOrder') ?? config('cart.condition_order.cart');
-        $this->itemConditionsOrder = $this->storage->get('cart:itemConditionsOrder') ?? config('cart.condition_order.item');
-        $this->meta = $this->storage->get('cart:meta') ?? [];
+        $this->initCart();
     }
 
-    public function clone(StorageInterface $storage, $dispatcher = null, $config = null): Cart
+    public function initCart()
     {
+        $this->items = $this->getStorage('cart:items') ?? new CartCollection();
+        $this->conditions = $this->getStorage('cart:conditions') ?? new ConditionCollection();
+
+        $this->conditionsOrder = $this->getStorage('cart:conditionsOrder') ?? config('cart.condition_order.cart');
+        $this->itemConditionsOrder = $this->getStorage('cart:itemConditionsOrder') ?? config('cart.condition_order.item');
+        $this->meta = $this->getStorage('cart:meta') ?? [];
+    }
+
+    public function clone(StorageInterface $storage = null, $dispatcher = null, $config = null): Cart
+    {
+        $storage ??= $this->storage;
+
         return new self($storage, $dispatcher ?? $this->dispatcher, $config ?? $this->config);
     }
 
@@ -73,6 +85,28 @@ class Cart implements \Serializable
     public function getInstanceKey()
     {
         return $this->storage->instance;
+    }
+
+    public function load(Cart $oldCart): self
+    {
+        $this->items = $oldCart->items();
+        $this->updateItemStorage();
+
+        $this->conditions = $oldCart->conditions();
+        $this->updateConditionStorage();
+
+        return $this;
+    }
+
+    public function merge(Cart $oldCart): self
+    {
+        $this->items = $this->items->merge($oldCart->items());
+        $this->updateItemStorage();
+
+        $this->conditions = $this->conditions->merge($oldCart->conditions());
+        $this->updateConditionStorage();
+
+        return $this;
     }
 
     public function emit($event, ...$args)
@@ -180,12 +214,12 @@ class Cart implements \Serializable
 
     public function getItemSubTotalBasePrice()
     {
-        return $this->items->sum(fn (CartItem $item) => $item->getPriceWithoutConditions() * $item->quantity);
+        return $this->items->sum(fn(CartItem $item) => $item->getPriceWithoutConditions() * $item->quantity);
     }
 
     public function getItemSubTotal()
     {
-        return round($this->items->sum(fn ($item) => $item->subtotal()), $this->config['precision']);
+        return round($this->items->sum(fn($item) => $item->subtotal()), $this->config['precision']);
     }
 
     public function subtotal()
@@ -220,7 +254,7 @@ class Cart implements \Serializable
 
     public function weight()
     {
-        return $this->items->sum(fn ($item) => $item->weight() * $item->quantity);
+        return $this->items->sum(fn($item) => $item->weight() * $item->quantity);
     }
 
     public function clear()
@@ -282,7 +316,7 @@ class Cart implements \Serializable
             ->pluck('conditions')
             ->flatten(1)
             ->groupBy('name')
-            ->map(function($conditions) {
+            ->map(function ($conditions) {
                 $condition = $conditions->first();
                 $condition->value = $conditions->sum('value');
 
@@ -321,7 +355,8 @@ class Cart implements \Serializable
      */
     public function setConditionsOrder(array $conditionsOrder): void
     {
-        $this->storage->put('cart:conditionsOrder', $conditionsOrder);
+        $this->putStorage('cart:conditionsOrder', $conditionsOrder);
+
         $this->conditionsOrder = $conditionsOrder;
 
         $this->updateConditionPrice();
@@ -332,7 +367,7 @@ class Cart implements \Serializable
      */
     public function setItemConditionsOrder(array $itemConditionsOrder): void
     {
-        $this->storage->put('cart:itemConditionsOrder', $itemConditionsOrder);
+        $this->putStorage('cart:itemConditionsOrder', $itemConditionsOrder);
 
         $this->itemConditionsOrder = $itemConditionsOrder;
 
@@ -345,7 +380,8 @@ class Cart implements \Serializable
     public function setMeta(string $key, mixed $data): void
     {
         $this->meta[$key] = $data;
-        $this->storage->put('cart:meta', $this->meta);
+
+        $this->putStorage('cart:meta', $this->meta);
     }
 
     public function getMeta(string $key, mixed $default): mixed
@@ -357,14 +393,40 @@ class Cart implements \Serializable
     {
         $this->updateConditionPrice();
 
-        $this->storage->put('cart:items', $this->items);
+        $this->putStorage('cart:items', $this->items);
     }
 
     private function updateConditionStorage()
     {
         $this->updateConditionPrice();
 
-        $this->storage->put('cart:conditions', $this->conditions);
+        $this->putStorage('cart:conditions', $this->conditions);
+    }
+
+    public static function defaultUserInstanceKey(): string
+    {
+        return Auth::check() ? Auth::id() : session()->getId();
+    }
+
+    public function loadSession($key)
+    {
+        $this->session = $key;
+        $this->initCart();
+    }
+
+    public function getSessionKey(): string
+    {
+        return $this->session;
+    }
+
+    protected function getStorage(string $key)
+    {
+        return $this->storage->get($this->getSessionKey() . '.' . $key);
+    }
+
+    protected function putStorage(string $key, mixed $data)
+    {
+        $this->storage->put($this->getSessionKey() . '.' . $key, $data);
     }
 
     public function serialize()
