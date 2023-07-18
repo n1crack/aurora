@@ -13,11 +13,11 @@ class CacheStorage implements StorageInterface
 
     public function get($key)
     {
-        return cache()->get("$this->instance.$key");
+        return cache()->store(config('cart.cache_store'))->get("$this->instance.$key");
     }
 
     public function put($key, $data)
     {
-        cache()->put("$this->instance.$key", $data);
+        cache()->store(config('cart.cache_store'))->put("$this->instance.$key", $data);
     }
 }

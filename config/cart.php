@@ -10,6 +10,8 @@ return [
 
     'cart_item' => \Ozdemir\Aurora\CartItem::class,
 
+    'cache_store' => config('cache.default'),
+
     'precision' => 2,
 
     'condition_order' => [
