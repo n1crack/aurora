@@ -219,7 +219,7 @@ class Cart implements \Serializable
 
     public function getItemSubTotal()
     {
-        return round($this->items->sum(fn ($item) => $item->subtotal()), $this->config['precision']);
+        return round($this->items->sum(fn (CartItem $item) => $item->subtotal()), $this->config['precision']);
     }
 
     public function subtotal()
@@ -254,7 +254,7 @@ class Cart implements \Serializable
 
     public function weight()
     {
-        return $this->items->sum(fn ($item) => $item->weight() * $item->quantity);
+        return $this->items->sum(fn (CartItem $item) => $item->weight() * $item->quantity);
     }
 
     public function clear()
