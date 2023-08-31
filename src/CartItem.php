@@ -116,6 +116,8 @@ class CartItem extends Collection
 
         $this->calculateConditionPrices();
 
+        app(config('cart.instance'))->updateItemStorage();
+
         return $this;
     }
 

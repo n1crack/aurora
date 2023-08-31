@@ -401,7 +401,7 @@ class Cart implements \Serializable
         return $this->meta[$key] ?? $default;
     }
 
-    private function updateItemStorage()
+    public function updateItemStorage()
     {
         $this->updateConditionPrice();
 
