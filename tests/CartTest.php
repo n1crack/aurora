@@ -430,7 +430,7 @@ it('can load any session Cart', function() {
     expect(Cart::quantity())->toBe(2);
     expect(Cart::weight())->toBe(8);
     expect(Cart::getInstanceKey())->toBe('cart');
-    expect(Cart::getSessionKey())->toBe(session()->getId());
+    expect(Cart::getSessionKey())->toContain('guest:');
 
     $user = (new \Illuminate\Foundation\Auth\User())->forceFill([
         'id' => 123,

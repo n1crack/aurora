@@ -3,6 +3,7 @@
 namespace Ozdemir\Aurora;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Ozdemir\Aurora\Storage\StorageInterface;
 
 class Cart implements \Serializable
@@ -417,7 +418,17 @@ class Cart implements \Serializable
 
     public static function defaultSessionKey(): string
     {
-        return Auth::check() ? Auth::id() : session()->getId();
+        if (Auth::check()) {
+            return 'user:' . Auth::id();
+        }
+        $guestToken = Cookie::get('guest_token');
+
+        if (!$guestToken) {
+            $guestToken = uniqid();
+            Cookie::queue('guest_token', $guestToken, 1440);
+        }
+
+        return 'guest:' . $guestToken;
     }
 
     public function loadSession($key)
