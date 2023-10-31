@@ -1,22 +1,20 @@
 <?php
 
 return [
-
     'instance' => 'cart',
-
-    'storage' => \Ozdemir\Aurora\Storage\SessionStorage::class,
 
     'cart_class' => \Ozdemir\Aurora\Cart::class,
 
-    'cart_item' => \Ozdemir\Aurora\CartItem::class,
+    'storage' => [
+        'class' => \Ozdemir\Aurora\Storages\SessionStorage::class,
 
-    'cache_store' => config('cache.default'),
-
-    'precision' => 2,
-
-    'condition_order' => [
-        'cart' => ['discount', 'other', 'shipping', 'coupon', 'tax'],
-        'item' => ['discount', 'other', 'shipping', 'coupon', 'tax'],
+        'session_key' => \Ozdemir\Aurora\DefaultSessionKey::class,
     ],
 
+    'cache_store' => env('CART_STORE', config('cache.default')),
+
+    'currency' => [
+
+        'precision' => 2,
+    ],
 ];

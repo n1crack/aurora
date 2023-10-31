@@ -1,20 +1,23 @@
 <?php
 
 
+use Ozdemir\Aurora\CartItem;
 use Ozdemir\Aurora\Facades\Cart;
 
 it('can return cart item class when a new item added', function() {
+    
     expect(Cart::isEmpty())->toBeTrue();
 
-    $item = Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 100,
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 3;
+    $product->price = 100;
 
-    expect($item)->toBeInstanceOf(config('cart.cart_item'));
+    Cart::add(
+        $item = new CartItem($product, quantity: 2),
+    );
 
-    expect(Cart::quantity())->toBe(2);
-    expect(Cart::isEmpty())->toBeFalse();
+    expect(get_class($item))->toImplement(\Ozdemir\Aurora\Contracts\CartItemInterface::class)
+        ->and(Cart::quantity())->toBe(2)
+        ->and(Cart::isEmpty())->toBeFalse();
+
 });

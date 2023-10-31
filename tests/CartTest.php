@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Collection;
-use Ozdemir\Aurora\CartAttribute;
+use Ozdemir\Aurora\CartItem;
 use Ozdemir\Aurora\Facades\Cart;
 
 it('is empty as default', function() {
@@ -22,376 +22,306 @@ it('is can get instance key for a logged-in user', function() {
     expect(Auth::check())->toBe(false);
     \Illuminate\Support\Facades\Auth::login($user);
 
-    expect(Auth::id())->toBe($user->id);
-    expect(Auth::check())->toBe(true);
-    expect(Cart::getInstanceKey())->toBe('cart');
+    expect(Auth::id())->toBe($user->id)
+        ->and(Auth::check())->toBe(true)
+        ->and(Cart::getInstanceKey())->toBe('cart');
 });
 
 
 it('can add items to Cart', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 3;
+    $product->price = 30;
 
-    expect(Cart::quantity())->toBe(1);
-    expect(Cart::isEmpty())->toBeFalse();
+    Cart::add(
+        new CartItem($product, quantity: 1),
+    );
+
+    expect(Cart::quantity())->toBe(1)
+        ->and(Cart::isEmpty())->toBeFalse();
 });
 
 it('can add multiple items to Cart', function() {
-    Cart::add([
-        [
-            'id' => 'tshirt',
-            'name' => 'T-Shirt',
-            'quantity' => 1,
-            'price' => 30,
-        ],
-        [
-            'id' => 'headphones',
-            'name' => 'Headphones',
-            'quantity' => 2,
-            'price' => 179,
-        ],
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 3;
+    $product->price = 30;
 
-    expect(Cart::items())->toHaveCount(2);
-    expect(Cart::quantity())->toBe(3);
+    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2->id = 4;
+    $product2->price = 179;
+
+    Cart::add(
+        new CartItem($product, 1),
+        new CartItem($product2, 2),
+    );
+
+    expect(Cart::items())->toHaveCount(2)
+        ->and(Cart::quantity())->toBe(3);
 });
 
 it('increase items count if the id is same', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-    ]);
 
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 3;
+    $product->price = 30;
 
-    expect(Cart::quantity())->toBe(2);
+    Cart::add(
+        new CartItem($product, quantity: 1),
+    );
+
+    Cart::add(
+        new CartItem($product, quantity: 1),
+    );
+
+    expect(Cart::items())->toHaveCount(1)
+        ->and(Cart::quantity())->toBe(2);
 });
 
-it('can add new item instance with the same item id if the item has a stock keeping unit', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-        'sku' => 'tshirt-blue-small',
-    ]);
+it('can have options and options have to be instance of CartItemOption Class', function() {
 
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-        'sku' => 'tshirt-red-large',
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 1;
+    $product->price = 30;
 
-    expect(Cart::items())->toHaveCount(2);
-    expect(Cart::quantity())->toBe(2);
+    Cart::add(
+        (new CartItem($product, quantity: 1))
+            ->withOption('color', 'red')
+            ->withOption('size', 'large')
+    );
+
+    expect(Cart::quantity())->toBe(1)
+        ->and(Cart::items()->first()->options)->toBeInstanceOf(Collection::class)
+        ->and(Cart::items()->first()->options)->toHaveCount(2)
+        ->and(Cart::items()->first()->options->first())->toBeInstanceOf(\Ozdemir\Aurora\CartItemOption::class)
+        ->and(Cart::items()->first()->options->first()->value)->toBe('red');
 });
 
-it('can have attribute and attribute have to be instance of CartAttribute Class', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-        'attributes' => [
-            'color' => ['label' => 'Red', 'value' => 'red'],
-            'size' => ['label' => 'Large', 'value' => 'l'],
-        ],
-    ]);
+it('can add new item instance with the same item id if the item has different options', function() {
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 1;
+    $product->price = 30;
+    $product->weight = 0;
 
-    expect(Cart::quantity())->toBe(1);
-    expect(Cart::items()->first()->attributes)->toBeInstanceOf(Collection::class);
-    expect(Cart::items()->first()->attributes)->toHaveCount(2);
-    expect(Cart::items()->first()->attributes->first())->toBeInstanceOf(CartAttribute::class);
-    expect(Cart::items()->first()->attributes->first()->get('value'))->toBe('red');
-});
+    Cart::add(
+        (new CartItem($product, quantity: 1))
+            ->withOption('color', 'red')
+            ->withOption('size', 'large')
+    );
 
-it('can add new item instance with the same item id if the item has different attributes without sku', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-        'attributes' => [
-            'color' => ['label' => 'Red', 'value' => 'red'],
-            'size' => ['label' => 'Large', 'value' => 'l'],
-        ],
-    ]);
+    Cart::add(
+        (new CartItem($product, quantity: 1))
+            ->withOption('color', 'blue')
+            ->withOption('size', 's')
+    );
 
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-        'attributes' => [
-            'color' => ['label' => 'Blue', 'value' => 'blue'],
-            'size' => ['label' => 'Small', 'value' => 's'],
-        ],
-    ]);
-    expect(Cart::items())->toHaveCount(2);
-    expect(Cart::quantity())->toBe(2);
-    expect(Cart::weight())->toBe(0);
+    expect(Cart::items())->toHaveCount(2)
+        ->and(Cart::quantity())->toBe(2)
+        ->and(Cart::weight())->toBe(0);
 });
 
 it('can sum total cart item prices', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 1,
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 1;
+    $product->price = 30;
+    $product->weight = 1;
 
-    Cart::add([
-        'id' => 'tv',
-        'name' => 'Television',
-        'quantity' => 1,
-        'price' => 470,
-        'weight' => 8,
-    ]);
+    Cart::add(
+        (new CartItem($product, quantity: 2))
+    );
 
-    expect(Cart::items())->toHaveCount(2);
-    expect(Cart::total())->toBe(530.0);
-    expect(Cart::subtotal())->toBe(530.0);
-    expect(Cart::weight())->toBe(10);
+    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2->id = 2;
+    $product2->price = 470;
+    $product2->weight = 8;
+
+    Cart::add(
+        (new CartItem($product2, quantity: 1))
+    );
+
+    expect(Cart::items())->toHaveCount(2)
+        ->and(Cart::total())->toBe(530)
+        ->and(Cart::subtotal())->toBe(530)
+        ->and(Cart::weight())->toBe(10);
 });
 
-it('can clear cart ', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 1,
-    ]);
+it('can clear the cart', function() {
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 1;
+    $product->price = 30;
+    $product->weight = 1;
 
-    expect(Cart::items())->toHaveCount(1);
-    expect(Cart::quantity())->toBe(2);
-    expect(Cart::weight())->toBe(2);
+    Cart::add(new CartItem($product, quantity: 2));
+
+    expect(Cart::items())->toHaveCount(1)
+        ->and(Cart::quantity())->toBe(2)
+        ->and(Cart::weight())->toBe(2);
 
     Cart::clear();
 
-    expect(Cart::isEmpty())->toBeTrue();
-    expect(Cart::items())->toHaveCount(0);
-    expect(Cart::total())->toBe(0.0);
-    expect(Cart::weight())->toBe(0);
+    expect(Cart::isEmpty())->toBeTrue()
+        ->and(Cart::items())->toHaveCount(0)
+        ->and(Cart::total())->toBe(0)
+        ->and(Cart::weight())->toBe(0);
 });
 
 it('can remove item from the cart', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 1,
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 1;
+    $product->price = 30;
+    $product->weight = 1;
 
-    Cart::add([
-        'id' => 'tv',
-        'name' => 'Television',
-        'quantity' => 1,
-        'price' => 470,
-        'weight' => 8,
-    ]);
+    Cart::add(new CartItem($product, 2));
 
-    expect(Cart::items())->toHaveCount(2);
-    expect(Cart::total())->toBe(530.0);
-    expect(Cart::quantity())->toBe(3);
-    expect(Cart::weight())->toBe(10);
+    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2->id = 2;
+    $product2->price = 470;
+    $product2->weight = 8;
 
-    $item = Cart::items()->last();
-    Cart::remove($item->hash());
+    Cart::add(new CartItem($product2, 1));
 
-    expect(Cart::items())->toHaveCount(1);
-    expect(Cart::total())->toBe(60.0);
-    expect(Cart::subtotal())->toBe(60.0);
-    expect(Cart::quantity())->toBe(2);
-    expect(Cart::weight())->toBe(2);
+    expect(Cart::items())->toHaveCount(2)
+        ->and(Cart::total())->toBe(530)
+        ->and(Cart::quantity())->toBe(3)
+        ->and(Cart::weight())->toBe(10);
+
+    $cartItem = Cart::items()->last();
+
+    Cart::remove($cartItem->hash());
+
+    expect(Cart::items())->toHaveCount(1)
+        ->and(Cart::total())->toBe(60)
+        ->and(Cart::subtotal())->toBe(60)
+        ->and(Cart::quantity())->toBe(2)
+        ->and(Cart::weight())->toBe(2);
 });
 
 it('can sync the items', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 1,
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 1;
+    $product->price = 30;
+    $product->weight = 1;
 
-    Cart::add([
-        'id' => 'tv',
-        'name' => 'Television',
-        'quantity' => 1,
-        'price' => 470,
-        'weight' => 8,
-    ]);
+    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2->id = 2;
+    $product2->price = 470;
+    $product2->weight = 8;
 
-    expect(Cart::items())->toHaveCount(2);
-    expect(Cart::total())->toBe(530.0);
-    expect(Cart::quantity())->toBe(3);
-    expect(Cart::weight())->toBe(10);
+    Cart::add(
+        new CartItem($product, 2),
+        new CartItem($product2, 1)
+    );
 
-    Cart::sync([
-        [
-            'id' => 'tv',
-            'name' => 'Television',
-            'quantity' => 2,
-            'price' => 630,
-            'weight' => 5,
-        ], [
-            'id' => 'tshirt',
-            'name' => 'T-Shirt',
-            'quantity' => 10,
-            'price' => 25,
-            'weight' => 1,
-        ],
-    ]);
+    expect(Cart::items())->toHaveCount(2)
+        ->and(Cart::total())->toBe(530)
+        ->and(Cart::quantity())->toBe(3)
+        ->and(Cart::weight())->toBe(10);
 
-    expect(Cart::items())->toHaveCount(2);
-    expect(Cart::total())->toBe(1510.0);
-    expect(Cart::quantity())->toBe(12);
-    expect(Cart::weight())->toBe(20);
+    $product->weight = 5;
+    $product->price = 630;
+    $product2->weight = 1;
+    $product2->price = 25;
+
+    Cart::sync(
+        new CartItem($product, 2),
+        new CartItem($product2, 10)
+    );
+
+    expect(Cart::items())->toHaveCount(2)
+        ->and(Cart::total())->toBe(1510)
+        ->and(Cart::quantity())->toBe(12)
+        ->and(Cart::weight())->toBe(20);
 });
 
-it('can update the items', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 1,
-    ]);
+it('can update the quantity', function() {
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 1;
+    $product->price = 30;
+    $product->weight = 1;
+
+    Cart::add(new CartItem($product, 2));
 
     $item = Cart::items()->first();
 
-    Cart::update($item->hash(), [
-        'id' => 'tshirt',
-        'name' => 'Updated T-Shirt',
-        'quantity' => 5,
-        'price' => 35,
-        'weight' => 0.5,
-    ]);
+    $updatedCartItem = Cart::update($item->hash(), 5);
 
-    expect($item->name)->toBe('Updated T-Shirt');
-    expect($item->quantity)->toBe(5);
-    expect($item->weight())->toBe(0.5);
-    expect($item->price())->toBe(35.0);
-
-    expect(Cart::items())->toHaveCount(1);
-    expect(Cart::quantity())->toBe(5);
-});
-
-it('can update only quantity if the second param is integer', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 1,
-    ]);
-
-    $item = Cart::items()->first();
-
-    expect($item->quantity)->toBe(2);
-    expect(Cart::items())->toHaveCount(1);
-
-    Cart::update($item->hash(), 20);
-
-    expect($item->quantity)->toBe(20);
-    expect(Cart::subtotal())->toBe(600.0);
-    expect(Cart::total())->toBe(600.0);
-    expect(Cart::items())->toHaveCount(1);
+    expect($item->quantity)->toBe(5)
+        ->and(Cart::items())->toHaveCount(1)
+        ->and(Cart::quantity())->toBe(5)
+        ->and($updatedCartItem)->toBeInstanceOf(CartItem::class);
 });
 
 it('can get items from hash', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 3,
-        'price' => 30,
-        'weight' => 1,
-        'attributes' => [
-            'color' => ['label' => 'Blue', 'value' => 'blue'],
-            'size' => ['label' => 'Small', 'value' => 's'],
-        ],
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 3;
+    $product->price = 30;
+    $product->weight = 1;
+
+    Cart::add(
+        (new CartItem($product, 3))
+            ->withOption('color', 'blue')
+            ->withOption('size', 's')
+    );
 
     $item = Cart::items()->first();
 
-    expect(Cart::item($item->hash))->toBeInstanceOf(\Ozdemir\Aurora\CartItem::class);
-    expect(Cart::item($item->hash)->id)->toBe('tshirt');
-    expect(Cart::item($item->hash)->name)->toBe('T-Shirt');
-    expect(Cart::item($item->hash)->quantity)->toBe(3);
-    expect(Cart::item($item->hash)->price)->toBe(30);
-    expect(Cart::item($item->hash)->weight)->toBe(1);
-    expect(Cart::item($item->hash)->attributes)->toBeInstanceOf(Collection::class);
-    expect(Cart::item($item->hash)->attributes)->toHaveCount(2);
-    expect(Cart::item($item->hash)->attributes->first())->toBeInstanceOf(CartAttribute::class);
-    expect(Cart::item($item->hash)->attributes->first()->label)->toBe('Blue');
-    expect(Cart::item($item->hash)->attributes->last()->label)->toBe('Small');
+    expect(Cart::item($item->hash))->toBeInstanceOf(\Ozdemir\Aurora\CartItem::class)
+        ->and(Cart::item($item->hash)->model->id)->toBe(3)
+        ->and(Cart::item($item->hash)->quantity)->toBe(3)
+        ->and(Cart::item($item->hash)->unitPrice())->toBe(30)
+        ->and(Cart::item($item->hash)->weight())->toBe(3)
+        ->and(Cart::item($item->hash)->options)->toBeInstanceOf(Collection::class)
+        ->and(Cart::item($item->hash)->options)->toHaveCount(2)
+        ->and(Cart::item($item->hash)->options->first())->toBeInstanceOf(\Ozdemir\Aurora\CartItemOption::class)
+        ->and(Cart::item($item->hash)->options->first()->label)->toBe('color')
+        ->and(Cart::item($item->hash)->options->first()->value)->toBe('blue')
+        ->and(Cart::item($item->hash)->options->last()->label)->toBe('size');
 });
 
 it('can initialize a new instance', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 4,
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 2;
+    $product->price = 30;
+    $product->weight = 4;
+
+    Cart::add(new CartItem($product, 2));
 
     expect(Cart::items())->toHaveCount(1);
 
-    $newStorage = new \Ozdemir\Aurora\Storage\ArrayStorage('wishlist');
-
-    $wishlist = Cart::clone(Cart::defaultSessionKey(), $newStorage);
+    $wishlist = Cart::make( new \Ozdemir\Aurora\Storages\ArrayStorage('wishlist'));
 
     expect($wishlist->items())->toHaveCount(0);
 
-    $wishlist->add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 100,
-        'price' => 30,
-        'weight' => 5,
-    ]);
-    expect($wishlist->items())->toHaveCount(1);
-    expect($wishlist->quantity())->toBe(100);
-    expect($wishlist->weight())->toBe(500);
-    expect($wishlist->getInstanceKey())->toBe('wishlist');
+    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2->id = 3;
+    $product2->price = 20;
+    $product2->weight = 5;
 
-    expect(Cart::items())->toHaveCount(1);
-    expect(Cart::quantity())->toBe(2);
-    expect(Cart::weight())->toBe(8);
-    expect(Cart::getInstanceKey())->toBe('cart');
+    $wishlist->add(new CartItem($product2, 100));
+
+    expect($wishlist->items())->toHaveCount(1)
+        ->and($wishlist->quantity())->toBe(100)
+        ->and($wishlist->weight())->toBe(500)
+        ->and($wishlist->getInstanceKey())->toBe('wishlist')
+        ->and(Cart::items())->toHaveCount(1)
+        ->and(Cart::quantity())->toBe(2)
+        ->and(Cart::weight())->toBe(8)
+        ->and(Cart::getInstanceKey())->toBe('cart');
 });
 
 
 it('can refresh user id after login', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 4,
-    ]);
 
-    expect(Cart::items())->toHaveCount(1);
-    expect(Cart::quantity())->toBe(2);
-    expect(Cart::weight())->toBe(8);
-    expect(Cart::getInstanceKey())->toBe('cart');
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 2;
+    $product->price = 30;
+    $product->weight = 4;
+
+    Cart::add(new CartItem($product, 2));
+
+    expect(Cart::items())->toHaveCount(1)
+        ->and(Cart::quantity())->toBe(2)
+        ->and(Cart::weight())->toBe(8)
+        ->and(Cart::getInstanceKey())->toBe('cart');
 
     $user = (new \Illuminate\Foundation\Auth\User())->forceFill([
         'id' => 123,
@@ -405,32 +335,31 @@ it('can refresh user id after login', function() {
     expect(Auth::id())->toBe($user->id);
     expect(Auth::check())->toBe(true);
 
-    Cart::loadSession(Auth::id());
+    Cart::loadSession('user:'. Auth::id());
 
-    expect(Cart::getSessionKey())->toBe('123');
+    expect(Cart::getSessionKey())->toBe('user:'. Auth::id())
+        ->and(Cart::items())->toHaveCount(0)
+        ->and(Cart::quantity())->toBe(0)
+        ->and(Cart::weight())->toBe(0)
+        ->and(Cart::total())->toBe(0)
+        ->and(Cart::getInstanceKey())->toBe('cart');
 
-    expect(Cart::items())->toHaveCount(0);
-    expect(Cart::quantity())->toBe(0);
-    expect(Cart::weight())->toBe(0);
-    expect(Cart::total())->toBe(0.0);
-    expect(Cart::getInstanceKey())->toBe('cart');
 });
 
 
 it('can load any session Cart', function() {
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 2,
-        'price' => 30,
-        'weight' => 4,
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product->id = 2;
+    $product->price = 30;
+    $product->weight = 4;
 
-    expect(Cart::items())->toHaveCount(1);
-    expect(Cart::quantity())->toBe(2);
-    expect(Cart::weight())->toBe(8);
-    expect(Cart::getInstanceKey())->toBe('cart');
-    expect(Cart::getSessionKey())->toContain('guest:');
+    Cart::add(new CartItem($product, 2));
+
+    expect(Cart::items())->toHaveCount(1)
+        ->and(Cart::quantity())->toBe(2)
+        ->and(Cart::weight())->toBe(8)
+        ->and(Cart::getInstanceKey())->toBe('cart')
+        ->and(Cart::getSessionKey())->toContain('guest:');
 
     $user = (new \Illuminate\Foundation\Auth\User())->forceFill([
         'id' => 123,
@@ -446,21 +375,19 @@ it('can load any session Cart', function() {
     expect(Auth::id())->toBe($user->id);
     expect(Auth::check())->toBe(true);
 
-    Cart::loadSession(Auth::id());
+    Cart::loadSession('user:'. Auth::id());
 
-    expect(Cart::getSessionKey())->toBe('123');
-
-    expect(Cart::items())->toHaveCount(0);
-    expect(Cart::quantity())->toBe(0);
-    expect(Cart::weight())->toBe(0);
-    expect(Cart::total())->toBe(0.0);
-    expect(Cart::getInstanceKey())->toBe('cart');
+    expect(Cart::getSessionKey())->toBe('user:'. Auth::id())
+        ->and(Cart::items())->toHaveCount(0)
+        ->and(Cart::quantity())->toBe(0)
+        ->and(Cart::weight())->toBe(0)
+        ->and(Cart::total())->toBe(0)
+        ->and(Cart::getInstanceKey())->toBe('cart');
 
     Cart::loadSession($oldSession);
 
-    expect(Cart::items())->toHaveCount(1);
-    expect(Cart::quantity())->toBe(2);
-    expect(Cart::weight())->toBe(8);
-    expect(Cart::getInstanceKey())->toBe('cart');
-
+    expect(Cart::items())->toHaveCount(1)
+        ->and(Cart::quantity())->toBe(2)
+        ->and(Cart::weight())->toBe(8)
+        ->and(Cart::getInstanceKey())->toBe('cart');
 });

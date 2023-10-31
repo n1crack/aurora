@@ -1,6 +1,6 @@
 <?php
 
-namespace Ozdemir\Aurora\Storage;
+namespace Ozdemir\Aurora\Storages;
 
 class ArrayStorage implements StorageInterface
 {

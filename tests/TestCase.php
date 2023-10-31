@@ -4,9 +4,8 @@ namespace Ozdemir\Aurora\Tests;
 
 use Illuminate\Events\Dispatcher;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Ozdemir\Aurora\Cart;
 use Ozdemir\Aurora\CartServiceProvider;
-use Ozdemir\Aurora\Storage\ArrayStorage;
+use Ozdemir\Aurora\Storages\ArrayStorage;
 
 class TestCase extends Orchestra
 {
@@ -14,12 +13,15 @@ class TestCase extends Orchestra
     {
         parent::setUp();
 
-        $this->app->singleton('laravel-cart', function($app) {
+        $this->app->singleton('cart', function($app) {
+            $cartClass = config('cart.cart_class');
+
+            //  $storageClass = config('cart.storage');
+            //  /* @var StorageInterface $storage */
+            //  $storage = new $storageClass('cart');
             $storage = new ArrayStorage('cart');
 
-            $session = Cart::defaultSessionKey();
-
-            return new Cart($session, $storage, new Dispatcher(), config('cart') ?? []);
+            return new $cartClass($storage);
         });
     }
 
