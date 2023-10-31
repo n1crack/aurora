@@ -14,6 +14,7 @@ return [
     'cache_store' => env('CART_STORE', config('cache.default')),
 
     'currency' => [
+        'class' => \Ozdemir\Aurora\Money::class,
 
         'precision' => 2,
     ],

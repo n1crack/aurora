@@ -68,30 +68,28 @@ class CartItem implements CartItemInterface
         return $this->model->cartItemWeight() * $this->quantity;
     }
 
-    public function itemPrice(): float|int
+    public function itemPrice(): Money
     {
-        return $this->model->cartItemPrice();
+        return new Money($this->model->cartItemPrice());
     }
 
-    public function optionPrice()
+    public function optionPrice(): Money
     {
-
-        return $this->options->sum(fn (CartItemOption $option) => $option->getPrice($this->itemPrice()));
+        return new Money($this->options->sum(fn (CartItemOption $option) => $option->getPrice($this->itemPrice()->amount())));
     }
 
-    public function unitPrice()
+    public function unitPrice(): Money
     {
-        return $this->model->cartItemPrice() + $this->optionPrice();
+        return $this->itemPrice()->add($this->optionPrice())->round();
     }
 
-    public function subtotal(): float|int
+    public function subtotal(): Money
     {
-        return $this->unitPrice() * $this->quantity;
+        return $this->unitPrice()->multiply($this->quantity);
     }
 
-    public function total(): float|int
+    public function total(): Money
     {
         return $this->subtotal();
     }
-
 }

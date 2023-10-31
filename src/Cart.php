@@ -9,7 +9,7 @@ class Cart
 {
     public CartItemCollection $items;
 
-    private string $sessionKey ;
+    private string $sessionKey;
 
     public function __construct(readonly public StorageInterface $storage)
     {
@@ -60,14 +60,14 @@ class Cart
         });
     }
 
-    public function subtotal(): float|int
+    public function subtotal(): Money
     {
-        return $this->items->reduce(fn ($total, CartItemInterface $cartItem) => $total + $cartItem->total(), 0);
+        return $this->items->subtotal();
     }
 
-    public function total(): float|int
+    public function total(): Money
     {
-        return $this->subtotal();
+        return $this->subtotal()->round();
     }
 
     public function weight(): float|int

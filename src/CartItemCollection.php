@@ -3,6 +3,7 @@
 namespace Ozdemir\Aurora;
 
 use Illuminate\Support\Collection;
+use Ozdemir\Aurora\Contracts\CartItemInterface;
 
 class CartItemCollection extends Collection
 {
@@ -25,5 +26,12 @@ class CartItemCollection extends Collection
         }
 
         return $this->get($cartItem->hash());
+    }
+
+    public function subtotal(): Money
+    {
+        return new Money(
+            $this->sum(fn (CartItemInterface $cartItem) => $cartItem->total()->amount())
+        );
     }
 }
