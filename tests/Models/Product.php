@@ -12,7 +12,6 @@ class Product implements Sellable
 
     public int $id;
     public float|int $price;
-    public float|int $basePrice;
     public int $quantity;
     public float|int $weight;
 }

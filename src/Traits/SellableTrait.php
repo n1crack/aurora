@@ -14,11 +14,6 @@ trait SellableTrait
         return $this->price;
     }
 
-    public function cartItemBasePrice()
-    {
-        return $this->basePrice;
-    }
-
     public function cartItemQuantity()
     {
         return $this->quantity;

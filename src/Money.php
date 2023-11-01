@@ -13,7 +13,7 @@ class Money
         return $this->amount;
     }
 
-    public function breakdowns()
+    public function breakdowns(): array
     {
         return $this->breakdowns;
     }
