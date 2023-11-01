@@ -2,7 +2,6 @@
 
 namespace Ozdemir\Aurora\Tests\Models;
 
-
 use Ozdemir\Aurora\Contracts\Sellable;
 use Ozdemir\Aurora\Traits\SellableTrait;
 

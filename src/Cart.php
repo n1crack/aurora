@@ -19,7 +19,7 @@ class Cart
     {
         $storage_session_key = config('cart.storage.session_key');
 
-        $this->sessionKey = (new $storage_session_key)();
+        $this->sessionKey = (new $storage_session_key())();
 
         $this->pipeline = app(CartCalculatorCollection::class);
 

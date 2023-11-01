@@ -4,7 +4,6 @@ namespace Ozdemir\Aurora\Traits;
 
 trait SellableTrait
 {
-
     public function cartItemId()
     {
         return $this->id;

@@ -3,13 +3,10 @@
 namespace Ozdemir\Aurora\Tests;
 
 use Closure;
-use Illuminate\Events\Dispatcher;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Ozdemir\Aurora\Cart;
 use Ozdemir\Aurora\CartServiceProvider;
 use Ozdemir\Aurora\Money;
 use Ozdemir\Aurora\Storages\ArrayStorage;
-use function PHPUnit\Framework\once;
 
 class TestCase extends Orchestra
 {

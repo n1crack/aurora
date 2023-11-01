@@ -287,7 +287,7 @@ it('can initialize a new instance', function() {
 
     expect(Cart::items())->toHaveCount(1);
 
-    $wishlist = Cart::make( new \Ozdemir\Aurora\Storages\ArrayStorage('wishlist'));
+    $wishlist = Cart::make(new \Ozdemir\Aurora\Storages\ArrayStorage('wishlist'));
 
     expect($wishlist->items())->toHaveCount(0);
 
