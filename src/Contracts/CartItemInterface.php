@@ -25,7 +25,4 @@ interface CartItemInterface
     public function unitPrice();
 
     public function subtotal();
-
-    public function total();
-
 }

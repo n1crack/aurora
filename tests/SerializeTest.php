@@ -42,7 +42,7 @@ it('can unserialize from serialized string', function() {
     expect(Cart::isEmpty())->toBeTrue();
 
     // restore the cart from snapshot
-    Cart::restore($snapshot);
+    Cart::rollback($snapshot);
 
     expect(Cart::subtotal()->amount())->toBe(156.0)
         ->and(Cart::total()->amount())->toBe(156.0)

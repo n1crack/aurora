@@ -2,10 +2,14 @@
 
 namespace Ozdemir\Aurora\Tests;
 
+use Closure;
 use Illuminate\Events\Dispatcher;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Ozdemir\Aurora\Cart;
 use Ozdemir\Aurora\CartServiceProvider;
+use Ozdemir\Aurora\Money;
 use Ozdemir\Aurora\Storages\ArrayStorage;
+use function PHPUnit\Framework\once;
 
 class TestCase extends Orchestra
 {
@@ -35,5 +39,62 @@ class TestCase extends Orchestra
     public function getEnvironmentSetUp($app)
     {
         config()->set('database.default', 'testing');
+    }
+}
+
+/* @noinspection */
+
+class TaxExample
+{
+    public function handle($payload, Closure $next)
+    {
+        /* @var Money $price */
+        [$price, $breakdowns] = $payload;
+
+        $taxPrice = new Money(15);
+
+        $price = $price->add($taxPrice);
+
+        $breakdowns[] = ['label' => 'Tax', 'value' => $taxPrice];
+
+        return $next([$price, $breakdowns]);
+    }
+}
+
+/* @noinspection */
+
+class ShippingExample
+{
+    public function handle($payload, Closure $next)
+    {
+        /* @var Cart $cart */
+        /* @var Money $price */
+        [$price, $breakdowns] = $payload;
+
+        $shippingCost = new Money(10);
+
+        $price = $price->add($shippingCost);
+
+        $breakdowns[] = ['label' => 'Shipping', 'value' => $shippingCost];
+
+        return $next([$price, $breakdowns]);
+    }
+}
+
+/* @noinspection */
+class DiscountExample
+{
+    public function handle($payload, Closure $next)
+    {
+        /* @var Money $price */
+        [$price, $breakdowns] = $payload;
+
+        $discountPrice = new Money($price->multiply(5 / 100)->amount());
+
+        $price = $price->subtract($discountPrice);
+
+        $breakdowns[] = ['label' => 'Discount', 'value' => $discountPrice->multiply(-1)];
+
+        return $next([$price, $breakdowns]);
     }
 }

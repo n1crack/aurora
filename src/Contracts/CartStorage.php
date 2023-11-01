@@ -1,8 +1,8 @@
 <?php
 
-namespace Ozdemir\Aurora\Storages;
+namespace Ozdemir\Aurora\Contracts;
 
-interface StorageInterface
+interface CartStorage
 {
     /**
      * @param $instance

@@ -2,7 +2,9 @@
 
 namespace Ozdemir\Aurora\Storages;
 
-class CacheStorage implements StorageInterface
+use Ozdemir\Aurora\Contracts\CartStorage;
+
+class CacheStorage implements CartStorage
 {
     public string $instance;
 

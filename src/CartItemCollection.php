@@ -31,7 +31,7 @@ class CartItemCollection extends Collection
     public function subtotal(): Money
     {
         return new Money(
-            $this->sum(fn (CartItemInterface $cartItem) => $cartItem->total()->amount())
+            $this->sum(fn (CartItemInterface $cartItem) => $cartItem->subtotal()->amount())
         );
     }
 }

@@ -5,6 +5,7 @@ namespace Ozdemir\Aurora;
 use Illuminate\Support\Collection;
 use Ozdemir\Aurora\Contracts\Sellable;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
+use Ozdemir\Aurora\Enums\CartItemCalculator;
 
 class CartItem implements CartItemInterface
 {
@@ -85,11 +86,20 @@ class CartItem implements CartItemInterface
 
     public function subtotal(): Money
     {
-        return $this->unitPrice()->multiply($this->quantity);
-    }
+        $pipeline = app(CartCalculatorCollection::class);
 
-    public function total(): Money
-    {
-        return $this->subtotal();
+        $calculators = collect($pipeline[CartItemCalculator::SUBTOTAL->value] ?? [])->filter(fn ($values) => in_array($this->model->id, $values));
+
+        $subtotal = $this->unitPrice()->multiply($this->quantity);
+
+        if ($calculators->count()) {
+            [$subtotal, $breakdowns] = Calculator::calculate(
+                $this->unitPrice()->multiply($this->quantity),
+                $calculators->keys()->toArray()
+            );
+
+            return $subtotal->setBreakdowns($breakdowns)->round();
+        }
+        return $subtotal->round();
     }
 }

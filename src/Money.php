@@ -4,7 +4,7 @@ namespace Ozdemir\Aurora;
 
 class Money
 {
-    public function __construct(public float|int $amount)
+    public function __construct(public float|int $amount, private $breakdowns = [])
     {
     }
 
@@ -13,16 +13,25 @@ class Money
         return $this->amount;
     }
 
+    public function breakdowns()
+    {
+        return $this->breakdowns;
+    }
+
+    public function setBreakdowns($breakdowns): static
+    {
+        $this->breakdowns = $breakdowns;
+
+        return new self($this->amount, $breakdowns);
+    }
+
     public function round($precision = null, $mode = PHP_ROUND_HALF_UP): static
     {
-        if (is_null($precision)) {
-            $precision = 2;
-//            $precision = config('cart.precision');
-        }
+        $precision ??= config('cart.precision');
 
         $amount = round($this->amount, $precision, $mode);
 
-        return $this->newInstance($amount);
+        return $this->newInstance($amount, $this->breakdowns);
     }
 
     public function add(self $addend): static
@@ -45,9 +54,9 @@ class Money
         return $this->newInstance($this->amount / $divisor);
     }
 
-    private function newInstance($amount): static
+    private function newInstance($amount, $breakdowns = []): static
     {
-        return new self($amount);
+        return new self($amount, $breakdowns);
     }
 
     public function isZero(): bool
@@ -57,6 +66,6 @@ class Money
 
     public function __toString()
     {
-        return (string) $this->amount;
+        return (string)$this->amount;
     }
 }

@@ -3,24 +3,30 @@
 namespace Ozdemir\Aurora;
 
 use Ozdemir\Aurora\Contracts\CartItemInterface;
-use Ozdemir\Aurora\Storages\StorageInterface;
+use Ozdemir\Aurora\Contracts\CartStorage;
+use Ozdemir\Aurora\Enums\CartCalculator;
+use Ozdemir\Aurora\Enums\CartItemCalculator;
 
 class Cart
 {
-    public CartItemCollection $items;
-
     private string $sessionKey;
 
-    public function __construct(readonly public StorageInterface $storage)
+    private CartCalculatorCollection $pipeline;
+
+    public CartItemCollection $items;
+
+    public function __construct(readonly public CartStorage $storage)
     {
         $storage_session_key = config('cart.storage.session_key');
 
         $this->sessionKey = (new $storage_session_key)();
 
-        $this->items = $this->getStorage('items') ?? new CartItemCollection();
+        $this->pipeline = app(CartCalculatorCollection::class);
+
+        $this->load();
     }
 
-    public function make(StorageInterface $storage): static
+    public function make(CartStorage $storage): static
     {
         return new static($storage);
     }
@@ -35,7 +41,7 @@ class Cart
         foreach ($cartItems as $cartItem) {
             $this->items->updateOrAdd($cartItem);
         }
-        $this->updateStorage('items', $this->items);
+        $this->save();
     }
 
     public function sync(CartItemInterface ...$cartItems): void
@@ -43,12 +49,13 @@ class Cart
         $this->clear();
 
         $this->add(...$cartItems);
-        $this->updateStorage('items', $this->items);
+
+        $this->save();
     }
 
     public function item(string $hash): CartItemInterface
     {
-        // todo: throw NotFound exception
+        // todo: throw NotFoundException
         return $this->items->get($hash);
     }
 
@@ -56,18 +63,29 @@ class Cart
     {
         return tap($this->item($hash), function(CartItemInterface $cartItem) use ($quantity) {
             $cartItem->quantity = $quantity;
-            $this->updateStorage('items', $this->items);
+
+            $this->save();
         });
     }
 
     public function subtotal(): Money
     {
-        return $this->items->subtotal();
+        [$subtotal, $breakdowns] = Calculator::calculate(
+            $this->items->subtotal(),
+            $this->pipeline[CartCalculator::SUBTOTAL->value] ?? []
+        );
+
+        return $subtotal->setBreakdowns($breakdowns)->round();
     }
 
     public function total(): Money
     {
-        return $this->subtotal()->round();
+        [$total, $breakdowns] = Calculator::calculate(
+            $this->subtotal(),
+            $this->pipeline[CartCalculator::TOTAL->value] ?? []
+        );
+
+        return $total->setBreakdowns($breakdowns)->round();
     }
 
     public function weight(): float|int
@@ -78,13 +96,15 @@ class Cart
     public function remove($hash): void
     {
         $this->items->forget($hash);
-        $this->updateStorage('items', $this->items);
+
+        $this->save();
     }
 
     public function clear(): void
     {
         $this->items = new CartItemCollection();
-        $this->updateStorage('items', $this->items);
+
+        $this->save();
     }
 
     public function isEmpty(): bool
@@ -102,11 +122,16 @@ class Cart
         return $this->items->sum('quantity');
     }
 
-    public function loadSession($sessionKey)
+    public function count(): int
+    {
+        return $this->items->count();
+    }
+
+    public function loadSession($sessionKey): void
     {
         $this->sessionKey = $sessionKey;
 
-        $this->items = $this->getStorage('items') ?? new CartItemCollection();
+        $this->load();
     }
 
     public function getSessionKey(): string
@@ -114,7 +139,19 @@ class Cart
         return $this->sessionKey;
     }
 
-    protected function updateStorage(string $key, mixed $data): void
+    private function save(): void
+    {
+        $this->putStorage('items', $this->items);
+    }
+
+    private function load(): void
+    {
+        $this->items = $this->getStorage('items') ?? new CartItemCollection();
+
+        $this->pipeline = $this->pipeline->reload($this->getStorage('pipeline'));
+    }
+
+    protected function putStorage(string $key, mixed $data): void
     {
         $this->storage->put($this->getSessionKey() . '.' . $key, $data);
     }
@@ -129,12 +166,45 @@ class Cart
         return serialize($this);
     }
 
-    public function restore(string $string): static
+    public function rollback(string $string): static
     {
         $cart = unserialize($string);
 
         $this->items = $cart->items();
 
+        $this->pipeline = $this->pipeline->reload($cart->calculators());
+
         return $this;
+    }
+
+    public function calculators(): CartCalculatorCollection
+    {
+        return $this->pipeline;
+    }
+
+    public function calculateUsing(CartCalculator $target, array $pipeline): void
+    {
+        $this->pipeline[$target->value] = $pipeline;
+
+        $this->putStorage('pipeline', $this->pipeline);
+    }
+
+    public function calculateItemsUsing(CartItemCalculator $target, array $pipeline): void
+    {
+        $this->pipeline[$target->value] = $pipeline;
+
+        $this->putStorage('pipeline', $this->pipeline);
+        $this->putStorage('items', $this->items);
+    }
+
+    public function instance(): array
+    {
+        return [
+            'subtotal' => $this->subtotal(),
+            'total' => $this->total(),
+            'item_breakdowns' => [],
+            'cart_breakdowns' => [],
+            'meta' => [],
+        ];
     }
 }
