@@ -28,23 +28,23 @@ class CartServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(CartCalculatorCollection::class, function($app) {
-            return new CartCalculatorCollection;
+            return new CartCalculatorCollection();
         });
 
-//        \Ozdemir\Aurora\Facades\Cart::calculateUsing(
-//            CartCalculator::SUBTOTAL,
-//            [
-//                Tax::class,
-//                ShippingClass::class
-//            ],
-//        );
-//
-//        \Ozdemir\Aurora\Facades\Cart::calculateUsing(
-//            CartCalculator::TOTAL,
-//            [
-//                Tax::class,
-//                ShippingClass::class
-//            ],
-//        );
+        //        \Ozdemir\Aurora\Facades\Cart::calculateUsing(
+        //            CartCalculator::SUBTOTAL,
+        //            [
+        //                Tax::class,
+        //                ShippingClass::class
+        //            ],
+        //        );
+        //
+        //        \Ozdemir\Aurora\Facades\Cart::calculateUsing(
+        //            CartCalculator::TOTAL,
+        //            [
+        //                Tax::class,
+        //                ShippingClass::class
+        //            ],
+        //        );
     }
 }

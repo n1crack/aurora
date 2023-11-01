@@ -4,10 +4,9 @@ use Ozdemir\Aurora\CartItem;
 use Ozdemir\Aurora\Facades\Cart;
 use Ozdemir\Aurora\Money;
 
-
 it('can use calculators', function() {
     Cart::calculateUsing(\Ozdemir\Aurora\Enums\CartCalculator::TOTAL, [
-        \Ozdemir\Aurora\Tests\ShippingExample::class
+        \Ozdemir\Aurora\Tests\ShippingExample::class,
     ]);
 
     $product = new \Ozdemir\Aurora\Tests\Models\Product();
@@ -23,8 +22,8 @@ it('can use calculators', function() {
         ->and(Cart::calculators()->toArray())->toBe(
             [
                 \Ozdemir\Aurora\Enums\CartCalculator::TOTAL->value => [
-                    \Ozdemir\Aurora\Tests\ShippingExample::class
-                ]
+                    \Ozdemir\Aurora\Tests\ShippingExample::class,
+                ],
             ]
         )
         ->and(Cart::total()->amount())->toBe(40.0);
@@ -124,7 +123,7 @@ it('can have inline calculators', function() {
 it('can have calculators on cart subtotal', function() {
 
     Cart::calculateUsing(\Ozdemir\Aurora\Enums\CartCalculator::SUBTOTAL, [
-        \Ozdemir\Aurora\Tests\DiscountExample::class  // - 5%
+        \Ozdemir\Aurora\Tests\DiscountExample::class,  // - 5%
     ]);
 
     $product = new \Ozdemir\Aurora\Tests\Models\Product();
@@ -140,8 +139,8 @@ it('can have calculators on cart subtotal', function() {
         ->and(Cart::calculators()->toArray())->toBe(
             [
                 \Ozdemir\Aurora\Enums\CartCalculator::SUBTOTAL->value => [
-                    \Ozdemir\Aurora\Tests\DiscountExample::class
-                ]
+                    \Ozdemir\Aurora\Tests\DiscountExample::class,
+                ],
             ]
         )
         ->and(Cart::subtotal()->amount())->toBe(190.0)
@@ -190,5 +189,3 @@ it('can have calculators on buyable item subtotal', function() {
         ->and(Cart::subtotal()->amount())->toBe(435.0)
         ->and(Cart::total()->amount())->toBe(435.0);
 });
-
-

@@ -4,7 +4,6 @@ namespace Ozdemir\Aurora;
 
 class Calculator
 {
-
     public static function calculate($price, $pipeline = [])
     {
         return app('pipeline')
