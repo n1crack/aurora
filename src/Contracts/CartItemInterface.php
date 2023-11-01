@@ -27,5 +27,4 @@ interface CartItemInterface
     public function subtotal();
 
     public function total();
-
 }

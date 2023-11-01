@@ -5,7 +5,7 @@ use Ozdemir\Aurora\CartItem;
 use Ozdemir\Aurora\Facades\Cart;
 
 it('can return cart item class when a new item added', function() {
-    
+
     expect(Cart::isEmpty())->toBeTrue();
 
     $product = new \Ozdemir\Aurora\Tests\Models\Product();

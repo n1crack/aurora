@@ -3,8 +3,8 @@
 namespace Ozdemir\Aurora;
 
 use Illuminate\Support\Collection;
-use Ozdemir\Aurora\Contracts\Sellable;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
+use Ozdemir\Aurora\Contracts\Sellable;
 
 class CartItem implements CartItemInterface
 {

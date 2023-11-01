@@ -2,7 +2,6 @@
 
 namespace Ozdemir\Aurora\Tests;
 
-use Illuminate\Events\Dispatcher;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Ozdemir\Aurora\CartServiceProvider;
 use Ozdemir\Aurora\Storages\ArrayStorage;

@@ -1,6 +1,5 @@
 <?php
 
-use Ozdemir\Aurora\Facades\Cart;
 
 it('can not update if the quantity is negative', function() {
     // NegativeQuantityException

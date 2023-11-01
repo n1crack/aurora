@@ -17,7 +17,7 @@ class Money
     {
         if (is_null($precision)) {
             $precision = 2;
-//            $precision = config('cart.precision');
+            //            $precision = config('cart.precision');
         }
 
         $amount = round($this->amount, $precision, $mode);

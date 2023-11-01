@@ -15,7 +15,7 @@ class Cart
     {
         $storage_session_key = config('cart.storage.session_key');
 
-        $this->sessionKey = (new $storage_session_key)();
+        $this->sessionKey = (new $storage_session_key())();
 
         $this->items = $this->getStorage('items') ?? new CartItemCollection();
     }
