@@ -4,6 +4,7 @@ namespace Ozdemir\Aurora\Tests;
 
 use Closure;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Ozdemir\Aurora\Cart;
 use Ozdemir\Aurora\CartServiceProvider;
 use Ozdemir\Aurora\Money;
 use Ozdemir\Aurora\Storages\ArrayStorage;
@@ -79,12 +80,19 @@ class ShippingExample
 }
 
 /* @noinspection */
+
 class DiscountExample
 {
     public function handle($payload, Closure $next)
     {
         /* @var Money $price */
         [$price, $breakdowns] = $payload;
+
+        $total = \Ozdemir\Aurora\Calculator::skip($this, function() {
+            return \Ozdemir\Aurora\Facades\Cart::total()->amount();
+        });
+
+        dump($total);
 
         $discountPrice = new Money($price->multiply(5 / 100)->amount());
 
