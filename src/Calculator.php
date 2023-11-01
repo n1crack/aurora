@@ -10,7 +10,7 @@ class Calculator
 
     public function __construct()
     {
-        $this->pipeline = new CartCalculatorCollection;
+        $this->pipeline = new CartCalculatorCollection();
     }
 
     public static function calculate($price, $calculations = [])
@@ -31,6 +31,4 @@ class Calculator
 
         return $value;
     }
-
-
 }
