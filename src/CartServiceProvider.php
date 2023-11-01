@@ -27,8 +27,8 @@ class CartServiceProvider extends ServiceProvider
             return new $cartClass($storage);
         });
 
-        $this->app->singleton(CartCalculatorCollection::class, function($app) {
-            return new CartCalculatorCollection;
+        $this->app->singleton(Calculator::class, function($app) {
+            return new Calculator();
         });
 
 //        \Ozdemir\Aurora\Facades\Cart::calculateUsing(

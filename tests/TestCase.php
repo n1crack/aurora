@@ -87,12 +87,12 @@ class DiscountExample
     {
         /* @var Money $price */
         [$price, $breakdowns] = $payload;
-
-        $total = \Ozdemir\Aurora\Calculator::skip($this, function() {
-            return \Ozdemir\Aurora\Facades\Cart::total()->amount();
-        });
-
-        dump($total);
+//
+//        $total = \Ozdemir\Aurora\Calculator::skip($this, function() {
+//            return \Ozdemir\Aurora\Facades\Cart::total()->amount();
+//        });
+//
+//        dump($total);
 
         $discountPrice = new Money($price->multiply(5 / 100)->amount());
 

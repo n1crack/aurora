@@ -21,7 +21,7 @@ class Cart
 
         $this->sessionKey = (new $storage_session_key())();
 
-        $this->pipeline = app(CartCalculatorCollection::class);
+        $this->pipeline = app(Calculator::class)->pipeline;
 
         $this->load();
     }

@@ -86,7 +86,7 @@ class CartItem implements CartItemInterface
 
     public function subtotal(): Money
     {
-        $pipeline = app(CartCalculatorCollection::class);
+        $pipeline = app(Calculator::class)->pipeline;
 
         $calculators = collect($pipeline[CartItemCalculator::SUBTOTAL->value] ?? [])->filter(fn ($values) => in_array($this->model->id, $values));
 

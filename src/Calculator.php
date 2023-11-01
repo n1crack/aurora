@@ -4,27 +4,30 @@ namespace Ozdemir\Aurora;
 
 class Calculator
 {
-    public $skipCalculation = null;
+    public ?string $skip = null;
 
-    public static function calculate($price, $pipeline = [])
+    public CartCalculatorCollection $pipeline;
+
+    public function __construct()
     {
-        $skip = app(CartCalculatorCollection::class)->skipped;
+        $this->pipeline = new CartCalculatorCollection;
+    }
 
+    public static function calculate($price, $calculations = [])
+    {
         return app('pipeline')
             ->send([$price, []])
-            ->through(collect($pipeline)->reject(fn ($value) => $value === $skip)->toArray())
+            ->through(collect($calculations)->reject(fn ($calculation) => $calculation === app(self::class)->skip)->toArray())
             ->thenReturn();
     }
 
     public static function skip($class, $callback): mixed
     {
-        $calcCollection = app(CartCalculatorCollection::class);
-
-        $calcCollection->skipped = is_string($class) ? $class : get_class($class);
+        app(self::class)->skip = is_string($class) ? $class : get_class($class);
 
         $value = $callback();
 
-        $calcCollection->skipped = null;
+        app(self::class)->skip = null;
 
         return $value;
     }
