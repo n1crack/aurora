@@ -4,8 +4,8 @@ namespace Ozdemir\Aurora;
 
 use Illuminate\Support\Collection;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
-use Ozdemir\Aurora\Enums\CartItemCalculator;
 use Ozdemir\Aurora\Contracts\Sellable;
+use Ozdemir\Aurora\Enums\CartItemCalculator;
 
 class CartItem implements CartItemInterface
 {
@@ -100,6 +100,7 @@ class CartItem implements CartItemInterface
 
             return $subtotal->setBreakdowns($breakdowns)->round();
         }
+
         return $subtotal->round();
     }
 }
