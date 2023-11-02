@@ -2,11 +2,9 @@
 
 namespace Ozdemir\Aurora\Tests;
 
-use Closure;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Ozdemir\Aurora\Cart;
 use Ozdemir\Aurora\CartServiceProvider;
-use Ozdemir\Aurora\Money;
 use Ozdemir\Aurora\Storages\ArrayStorage;
 
 class TestCase extends Orchestra

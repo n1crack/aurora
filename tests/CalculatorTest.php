@@ -215,8 +215,9 @@ it('can have inline calculators on sellable item subtotal', function() {
             [$price, $breakdowns] = $payload;
             $price = $price->add(new Money(0.01));
             $breakdowns[] = ['label' => 'Custom Shipping', 'value' => '0.01$'];
+
             return $next([$price, $breakdowns]);
-        }
+        },
     ]);
 
     $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
@@ -237,4 +238,3 @@ it('can have inline calculators on sellable item subtotal', function() {
         ->and(Cart::items()->first()->subtotal()->amount())->toBe(190.01)
         ->and(Cart::items()->first()->subtotal()->breakdowns()[1])->toBe(['label' => 'Custom Shipping', 'value' => '0.01$']);
 });
-
