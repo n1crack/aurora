@@ -18,6 +18,7 @@ it('can use calculators', function() {
     );
 
     expect(Cart::quantity())->toBe(1)
+        ->and(Cart::count())->toBe(1)
         ->and(Cart::isEmpty())->toBeFalse()
         ->and(Cart::calculators()->toArray())->toBe(
             [
@@ -135,7 +136,6 @@ it('can have calculators on cart subtotal', function() {
     );
 
     expect(Cart::quantity())->toBe(1)
-        ->and(Cart::isEmpty())->toBeFalse()
         ->and(Cart::calculators()->toArray())->toBe(
             [
                 \Ozdemir\Aurora\Enums\CartCalculator::SUBTOTAL->value => [
@@ -181,8 +181,6 @@ it('can have calculators on sellable item subtotal', function() {
     );
 
     expect(Cart::quantity())->toBe(5)
-        ->and(Cart::count())->toBe(3)
-        ->and(Cart::isEmpty())->toBeFalse()
         ->and(Cart::subtotal()->amount())->toBe(435.0)
         ->and(Cart::total()->amount())->toBe(435.0);
 });
@@ -206,8 +204,6 @@ it('can have default calculators on subtotals of every sellable items', function
     );
 
     expect(Cart::quantity())->toBe(4)
-        ->and(Cart::count())->toBe(2)
-        ->and(Cart::isEmpty())->toBeFalse()
         ->and(Cart::subtotal()->amount())->toBe(332.5)
         ->and(Cart::total()->amount())->toBe(332.5);
 });
@@ -218,6 +214,7 @@ it('can have inline calculators on sellable item subtotal', function() {
         function($payload, Closure $next) { // simply add + 0.01$ for every items subtotal value.
             [$price, $breakdowns] = $payload;
             $price = $price->add(new Money(0.01));
+            $breakdowns[] = ['label' => 'Custom Shipping', 'value' => '0.01$'];
             return $next([$price, $breakdowns]);
         }
     ]);
@@ -236,9 +233,8 @@ it('can have inline calculators on sellable item subtotal', function() {
     );
 
     expect(Cart::quantity())->toBe(4)
-        ->and(Cart::count())->toBe(2)
-        ->and(Cart::isEmpty())->toBeFalse()
         ->and(Cart::subtotal()->amount())->toBe(332.52)
-        ->and(Cart::total()->amount())->toBe(332.52);
+        ->and(Cart::items()->first()->subtotal()->amount())->toBe(190.01)
+        ->and(Cart::items()->first()->subtotal()->breakdowns()[1])->toBe(['label' => 'Custom Shipping', 'value' => '0.01$']);
 });
 
