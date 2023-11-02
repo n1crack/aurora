@@ -5,7 +5,7 @@ use Ozdemir\Aurora\Facades\Cart;
 
 it('can snapshot the current cart', function() {
 
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 3;
     $product->price = 30;
     $product->weight = 1;
@@ -20,7 +20,7 @@ it('can snapshot the current cart', function() {
 
 it('can unserialize from serialized string', function() {
     expect(Cart::isEmpty())->toBeTrue();
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 3;
     $product->price = 40;
     $product->weight = 1;

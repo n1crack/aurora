@@ -36,11 +36,12 @@ class Cart
         return $this->items;
     }
 
-    public function add(CartItemInterface  ...$cartItems): void
+    public function add(CartItemInterface ...$cartItems): void
     {
         foreach ($cartItems as $cartItem) {
             $this->items->updateOrAdd($cartItem);
         }
+
         $this->save();
     }
 

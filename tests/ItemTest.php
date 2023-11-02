@@ -8,7 +8,7 @@ it('can return cart item class when a new item added', function() {
 
     expect(Cart::isEmpty())->toBeTrue();
 
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 3;
     $product->price = 100;
 

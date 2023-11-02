@@ -1,6 +1,6 @@
 <?php
 
-namespace Ozdemir\Aurora\Tests\Models;
+namespace Ozdemir\Aurora\Tests\Stubs\Models;
 
 use Ozdemir\Aurora\Contracts\Sellable;
 use Ozdemir\Aurora\Traits\SellableTrait;

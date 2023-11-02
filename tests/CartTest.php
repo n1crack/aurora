@@ -24,12 +24,13 @@ it('is can get instance key for a logged-in user', function() {
 
     expect(Auth::id())->toBe($user->id)
         ->and(Auth::check())->toBe(true)
+        ->and(Cart::getSessionKey())->toBe('user:123')
         ->and(Cart::getInstanceKey())->toBe('cart');
 });
 
 
 it('can add items to Cart', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 3;
     $product->price = 30;
 
@@ -38,15 +39,16 @@ it('can add items to Cart', function() {
     );
 
     expect(Cart::quantity())->toBe(1)
+        ->and(Cart::total()->amount())->toBe(30.0)
         ->and(Cart::isEmpty())->toBeFalse();
 });
 
 it('can add multiple items to Cart', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 3;
     $product->price = 30;
 
-    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2 = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product2->id = 4;
     $product2->price = 179;
 
@@ -61,7 +63,7 @@ it('can add multiple items to Cart', function() {
 
 it('increase items count if the id is same', function() {
 
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 3;
     $product->price = 30;
 
@@ -79,7 +81,7 @@ it('increase items count if the id is same', function() {
 
 it('can have options and options have to be instance of CartItemOption Class', function() {
 
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 1;
     $product->price = 30;
 
@@ -97,7 +99,7 @@ it('can have options and options have to be instance of CartItemOption Class', f
 });
 
 it('can add new item instance with the same item id if the item has different options', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 1;
     $product->price = 30;
     $product->weight = 0;
@@ -120,7 +122,7 @@ it('can add new item instance with the same item id if the item has different op
 });
 
 it('can sum total cart item prices', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 1;
     $product->price = 30;
     $product->weight = 1;
@@ -129,7 +131,7 @@ it('can sum total cart item prices', function() {
         (new CartItem($product, quantity: 2))
     );
 
-    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2 = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product2->id = 2;
     $product2->price = 470;
     $product2->weight = 8;
@@ -145,7 +147,7 @@ it('can sum total cart item prices', function() {
 });
 
 it('can clear the cart', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 1;
     $product->price = 30;
     $product->weight = 1;
@@ -165,14 +167,14 @@ it('can clear the cart', function() {
 });
 
 it('can remove item from the cart', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 1;
     $product->price = 30;
     $product->weight = 1;
 
     Cart::add(new CartItem($product, 2));
 
-    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2 = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product2->id = 2;
     $product2->price = 470;
     $product2->weight = 8;
@@ -196,12 +198,12 @@ it('can remove item from the cart', function() {
 });
 
 it('can sync the items', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 1;
     $product->price = 30;
     $product->weight = 1;
 
-    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2 = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product2->id = 2;
     $product2->price = 470;
     $product2->weight = 8;
@@ -233,7 +235,7 @@ it('can sync the items', function() {
 });
 
 it('can update the quantity', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 1;
     $product->price = 30;
     $product->weight = 1;
@@ -251,7 +253,7 @@ it('can update the quantity', function() {
 });
 
 it('can get items from hash', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 3;
     $product->price = 30;
     $product->weight = 1;
@@ -278,7 +280,7 @@ it('can get items from hash', function() {
 });
 
 it('can initialize a new instance', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 2;
     $product->price = 30;
     $product->weight = 4;
@@ -291,7 +293,7 @@ it('can initialize a new instance', function() {
 
     expect($wishlist->items())->toHaveCount(0);
 
-    $product2 = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product2 = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product2->id = 3;
     $product2->price = 20;
     $product2->weight = 5;
@@ -311,7 +313,7 @@ it('can initialize a new instance', function() {
 
 it('can refresh user id after login', function() {
 
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 2;
     $product->price = 30;
     $product->weight = 4;
@@ -348,7 +350,7 @@ it('can refresh user id after login', function() {
 
 
 it('can load any session Cart', function() {
-    $product = new \Ozdemir\Aurora\Tests\Models\Product();
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
     $product->id = 2;
     $product->price = 30;
     $product->weight = 4;
