@@ -24,9 +24,9 @@ class CartItem implements CartItemInterface
 
     public function hash(): string
     {
-        $attr = $this->options->pluck('value')->join('-');
+        $options = $this->options->pluck('value')->join('-');
 
-        return $this->hash = md5($this->model->cartItemId() . $attr . $this->gift);
+        return $this->hash = md5($this->model->cartItemId() . $options . $this->gift);
     }
 
     public function withOption(string $name, mixed $value, float|int $price = 0, bool $percent = false, float|int $weight = 0): static
