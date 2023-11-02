@@ -183,16 +183,23 @@ class Cart
         return $this->pipeline;
     }
 
-    public function calculateUsing(CartCalculator $target, array $pipeline): void
+    public function calculateTotalUsing(array $pipeline): void
     {
-        $this->pipeline[$target->value] = $pipeline;
+        $this->pipeline[CartCalculator::TOTAL->value] = $pipeline;
 
         $this->putStorage('pipeline', $this->pipeline);
     }
 
-    public function calculateItemsUsing(CartItemCalculator $target, array $pipeline): void
+    public function calculateSubtotalUsing(array $pipeline): void
     {
-        $this->pipeline[$target->value] = $pipeline;
+        $this->pipeline[CartCalculator::SUBTOTAL->value] = $pipeline;
+
+        $this->putStorage('pipeline', $this->pipeline);
+    }
+
+    public function calculateItemSubtotalUsing(array $pipeline): void
+    {
+        $this->pipeline[CartItemCalculator::SUBTOTAL->value] = $pipeline;
 
         $this->putStorage('pipeline', $this->pipeline);
         $this->putStorage('items', $this->items);

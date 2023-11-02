@@ -27,7 +27,7 @@ class Money
 
     public function round($precision = null, $mode = PHP_ROUND_HALF_UP): static
     {
-        $precision ??= config('cart.precision');
+        $precision ??= config('cart.currency.precision');
 
         $amount = round($this->amount, $precision, $mode);
 
