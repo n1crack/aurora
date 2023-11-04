@@ -147,7 +147,7 @@ class Cart
 
     private function load(): void
     {
-        $this->items = $this->getStorage('items') ?? new CartItemCollection();
+        $this->items = $this->getStorage('items', new CartItemCollection());
 
         $this->pipeline = $this->pipeline->reload($this->getStorage('pipeline'));
     }
@@ -157,9 +157,9 @@ class Cart
         $this->storage->put($this->getSessionKey() . '.' . $key, $data);
     }
 
-    protected function getStorage(string $key): mixed
+    protected function getStorage(string $key, $default = null): mixed
     {
-        return $this->storage->get($this->getSessionKey() . '.' . $key);
+        return $this->storage->get($this->getSessionKey() . '.' . $key, $default);
     }
 
     public function snapshot(): string
@@ -210,9 +210,17 @@ class Cart
         return [
             'subtotal' => $this->subtotal(),
             'total' => $this->total(),
-            'item_breakdowns' => [],
-            'cart_breakdowns' => [],
-            'meta' => [],
+            // todo.. breakdowns etc..
         ];
+    }
+
+    public function validate($clientChecksum): bool
+    {
+        return $this->checksum() === $clientChecksum;
+    }
+
+    public function checksum(): string
+    {
+        return (new (config('cart.checksum_generator')))();
     }
 }

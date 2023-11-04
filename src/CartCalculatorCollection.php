@@ -8,7 +8,7 @@ class CartCalculatorCollection extends Collection
 {
     public function reload($items = []): static
     {
-        $this->items = $items;
+        $this->items = $items ?? [];
 
         return $this;
     }

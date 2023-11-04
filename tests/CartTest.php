@@ -337,9 +337,9 @@ it('can refresh user id after login', function() {
     expect(Auth::id())->toBe($user->id);
     expect(Auth::check())->toBe(true);
 
-    Cart::loadSession('user:'. Auth::id());
+    Cart::loadSession('user:' . Auth::id());
 
-    expect(Cart::getSessionKey())->toBe('user:'. Auth::id())
+    expect(Cart::getSessionKey())->toBe('user:' . Auth::id())
         ->and(Cart::items())->toHaveCount(0)
         ->and(Cart::quantity())->toBe(0)
         ->and(Cart::weight())->toBe(0)
@@ -377,9 +377,9 @@ it('can load any session Cart', function() {
     expect(Auth::id())->toBe($user->id);
     expect(Auth::check())->toBe(true);
 
-    Cart::loadSession('user:'. Auth::id());
+    Cart::loadSession('user:' . Auth::id());
 
-    expect(Cart::getSessionKey())->toBe('user:'. Auth::id())
+    expect(Cart::getSessionKey())->toBe('user:' . Auth::id())
         ->and(Cart::items())->toHaveCount(0)
         ->and(Cart::quantity())->toBe(0)
         ->and(Cart::weight())->toBe(0)

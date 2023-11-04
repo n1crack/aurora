@@ -11,14 +11,15 @@ interface CartStorage
 
     /**
      * @param $key
+     * @param null $default
      * @return mixed
      */
-    public function get($key);
+    public function get($key, $default = null): mixed;
 
     /**
      * @param $key
      * @param $data
-     * @return mixed
+     * @return void
      */
-    public function put($key, $data);
+    public function put($key, $data): void;
 }

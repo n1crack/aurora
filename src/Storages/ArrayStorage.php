@@ -15,12 +15,12 @@ class ArrayStorage implements CartStorage
         $this->instance = $instance;
     }
 
-    public function get($key)
+    public function get($key, $default = null): mixed
     {
-        return $this->session["$this->instance.$key"] ?? null;
+        return $this->session["$this->instance.$key"] ?? $default;
     }
 
-    public function put($key, $data)
+    public function put($key, $data): void
     {
         $this->session["$this->instance.$key"] = $data;
     }

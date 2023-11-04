@@ -13,12 +13,12 @@ class SessionStorage implements CartStorage
         $this->instance = $instance;
     }
 
-    public function get($key)
+    public function get($key, $default = null): mixed
     {
-        return session()->get("$this->instance.$key");
+        return session()->get("$this->instance.$key", $default);
     }
 
-    public function put($key, $data)
+    public function put($key, $data): void
     {
         session()->put("$this->instance.$key", $data);
     }

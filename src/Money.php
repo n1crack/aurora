@@ -4,7 +4,7 @@ namespace Ozdemir\Aurora;
 
 class Money
 {
-    public function __construct(public float|int $amount, private $breakdowns = [])
+    public function __construct(readonly private float|int $amount, private $breakdowns = [])
     {
     }
 
@@ -27,7 +27,7 @@ class Money
 
     public function round($precision = null, $mode = PHP_ROUND_HALF_UP): static
     {
-        $precision ??= config('cart.currency.precision');
+        $precision ??= config('cart.currency.precision', 2);
 
         $amount = round($this->amount, $precision, $mode);
 

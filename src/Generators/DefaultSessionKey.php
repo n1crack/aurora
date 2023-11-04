@@ -1,6 +1,6 @@
 <?php
 
-namespace Ozdemir\Aurora;
+namespace Ozdemir\Aurora\Generators;
 
 use Illuminate\Support\Facades\Auth;
 
