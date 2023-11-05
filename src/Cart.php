@@ -17,7 +17,7 @@ class Cart
 
     public function __construct(readonly public CartStorage $storage)
     {
-        $storage_session_key = config('cart.storage.session_key');
+        $storage_session_key = config('cart.session_key_generator');
 
         $this->sessionKey = (new $storage_session_key())();
 

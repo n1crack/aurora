@@ -4,7 +4,7 @@ namespace Ozdemir\Aurora\Generators;
 
 use Illuminate\Support\Facades\Auth;
 
-class DefaultSessionKey
+class GenerateSessionKey
 {
     public function __invoke(): string
     {

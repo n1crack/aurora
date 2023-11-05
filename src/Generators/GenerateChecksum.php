@@ -4,7 +4,7 @@ namespace Ozdemir\Aurora\Generators;
 
 use Ozdemir\Aurora\Facades\Cart;
 
-class CheckSumGenerator
+class GenerateChecksum
 {
     public function __invoke(): string
     {

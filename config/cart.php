@@ -5,11 +5,7 @@ return [
 
     'cart_class' => \Ozdemir\Aurora\Cart::class,
 
-    'storage' => [
-        'class' => \Ozdemir\Aurora\Storages\SessionStorage::class,
-
-        'session_key' => \Ozdemir\Aurora\Generators\DefaultSessionKey::class,
-    ],
+    'storage' => \Ozdemir\Aurora\Storages\SessionStorage::class,
 
     'cache_store' => env('CART_STORE', config('cache.default')),
 
@@ -19,5 +15,7 @@ return [
         'precision' => env('CART_CURRENCY_PRECISION', 2),
     ],
 
-    'checksum_generator' => \Ozdemir\Aurora\Generators\CheckSumGenerator::class
+    'session_key_generator' => \Ozdemir\Aurora\Generators\GenerateSessionKey::class,
+
+    'checksum_generator' => \Ozdemir\Aurora\Generators\GenerateChecksum::class
 ];
