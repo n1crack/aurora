@@ -10,7 +10,7 @@ class GenerateChecksum
     {
         return md5(serialize([
             Cart::items()->values()->pluck('quantity', 'hash'),
-            Cart::total()->amount()
+            Cart::total()->amount(),
         ]));
     }
 }

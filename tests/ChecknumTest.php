@@ -119,6 +119,3 @@ it('has a checknum that can be changed if the inline calculators changes', funct
         ->and(Cart::checksum())->toBe('0ff00255271d88df533d68a60a498dff')
         ->and(Cart::validate('19acbc85fc3a5e4d74e08f3c78275736'))->toBeFalse();
 });
-
-
-

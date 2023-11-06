@@ -13,7 +13,7 @@ class CacheStorage implements CartStorage
         $this->instance = $instance;
     }
 
-    public function get($key, $default  = null): mixed
+    public function get($key, $default = null): mixed
     {
         return cache()->store(config('cart.cache_store'))->get("$this->instance.$key", $default);
     }
