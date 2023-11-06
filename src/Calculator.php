@@ -17,17 +17,17 @@ class Calculator
     {
         return app('pipeline')
             ->send([$price, []])
-            ->through(collect($calculations)->reject(fn ($calculation) => $calculation === app(self::class)->skip)->toArray())
+            ->through(collect($calculations)->reject(fn ($calculation) => $calculation === app(Calculator::class)->skip)->toArray())
             ->thenReturn();
     }
 
     public static function skip($class, $callback): mixed
     {
-        app(self::class)->skip = is_string($class) ? $class : get_class($class);
+        app(Calculator::class)->skip = is_string($class) ? $class : get_class($class);
 
         $value = $callback();
 
-        app(self::class)->skip = null;
+        app(Calculator::class)->skip = null;
 
         return $value;
     }
