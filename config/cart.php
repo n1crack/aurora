@@ -1,21 +1,43 @@
 <?php
 
+use Ozdemir\Aurora\Cart;
+use Ozdemir\Aurora\Enums\CartCalculator;
+use Ozdemir\Aurora\Enums\CartItemCalculator;
+use Ozdemir\Aurora\Generators\GenerateChecksum;
+use Ozdemir\Aurora\Generators\GenerateSessionKey;
+use Ozdemir\Aurora\Money;
+use Ozdemir\Aurora\Storages\SessionStorage;
+
 return [
     'instance' => 'cart',
 
-    'cart_class' => \Ozdemir\Aurora\Cart::class,
+    'cart_class' => Cart::class,
 
-    'storage' => \Ozdemir\Aurora\Storages\SessionStorage::class,
+    'storage' => SessionStorage::class,
 
     'cache_store' => env('CART_STORE', config('cache.default')),
 
     'currency' => [
-        'class' => \Ozdemir\Aurora\Money::class,
+        'class' => Money::class,
 
         'precision' => env('CART_CURRENCY_PRECISION', 2),
     ],
 
-    'session_key_generator' => \Ozdemir\Aurora\Generators\GenerateSessionKey::class,
+    'session_key_generator' => GenerateSessionKey::class,
 
-    'checksum_generator' => \Ozdemir\Aurora\Generators\GenerateChecksum::class
+    'checksum_generator' => GenerateChecksum::class,
+
+    'calculate_using' => [
+        CartItemCalculator::SUBTOTAL->value => [
+            //
+        ],
+
+        CartCalculator::SUBTOTAL->value => [
+            //
+        ],
+
+        CartCalculator::TOTAL->value => [
+            //
+        ]
+    ]
 ];

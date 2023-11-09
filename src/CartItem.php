@@ -105,7 +105,7 @@ class CartItem implements CartItemInterface
         $subtotal = $this->unitPrice()->multiply($this->quantity);
 
         if (count($pipeline)) {
-            [$subtotal, $breakdowns] = Calculator::calculate(
+            [$subtotal, $breakdowns] = resolve(Calculator::class)->calculate(
                 $this->unitPrice()->multiply($this->quantity),
                 $pipeline
             );

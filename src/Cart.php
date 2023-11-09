@@ -19,9 +19,7 @@ class Cart
 
     public function __construct(readonly public CartStorage $storage)
     {
-        $storage_session_key = config('cart.session_key_generator');
-
-        $this->sessionKey = (new $storage_session_key())();
+        $this->sessionKey = call_user_func(new (config('cart.session_key_generator')));
 
         $this->pipeline = app(Calculator::class)->pipeline;
 
@@ -73,7 +71,7 @@ class Cart
 
     public function subtotal(): Money
     {
-        [$subtotal, $breakdowns] = Calculator::calculate(
+        [$subtotal, $breakdowns] = resolve(Calculator::class)->calculate(
             $this->items->subtotal(),
             $this->pipeline[CartCalculator::SUBTOTAL->value] ?? []
         );
@@ -83,7 +81,7 @@ class Cart
 
     public function total(): Money
     {
-        [$total, $breakdowns] = Calculator::calculate(
+        [$total, $breakdowns] = resolve(Calculator::class)->calculate(
             $this->subtotal(),
             $this->pipeline[CartCalculator::TOTAL->value] ?? []
         );
@@ -153,8 +151,6 @@ class Cart
         $this->items = $this->getStorage('items', new CartItemCollection());
 
         $this->meta = $this->getStorage('meta', new MetaCollection());
-
-        $this->pipeline = $this->pipeline->reload($this->getStorage('pipeline'));
     }
 
     protected function putStorage(string $key, mixed $data): void
@@ -199,8 +195,6 @@ class Cart
 
         $this->meta = $cart->meta();
 
-        $this->pipeline = $this->pipeline->reload($cart->calculators());
-
         return $this;
     }
 
@@ -212,22 +206,17 @@ class Cart
     public function calculateTotalUsing(array $pipeline): void
     {
         $this->pipeline[CartCalculator::TOTAL->value] = $pipeline;
-
-        $this->putStorage('pipeline', $this->pipeline);
     }
 
     public function calculateSubtotalUsing(array $pipeline): void
     {
         $this->pipeline[CartCalculator::SUBTOTAL->value] = $pipeline;
-
-        $this->putStorage('pipeline', $this->pipeline);
     }
 
     public function calculateItemSubtotalUsing(array $pipeline): void
     {
         $this->pipeline[CartItemCalculator::SUBTOTAL->value] = $pipeline;
 
-        $this->putStorage('pipeline', $this->pipeline);
         $this->putStorage('items', $this->items);
     }
 
@@ -247,6 +236,6 @@ class Cart
 
     public function checksum(): string
     {
-        return (new (config('cart.checksum_generator')))();
+        return call_user_func(new (config('cart.checksum_generator')));
     }
 }

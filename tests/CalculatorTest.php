@@ -20,13 +20,7 @@ it('can use calculators', function() {
     expect(Cart::quantity())->toBe(1)
         ->and(Cart::count())->toBe(1)
         ->and(Cart::isEmpty())->toBeFalse()
-        ->and(Cart::calculators()->toArray())->toBe(
-            [
-                \Ozdemir\Aurora\Enums\CartCalculator::TOTAL->value => [
-                    \Ozdemir\Aurora\Tests\Stubs\Calculators\Shipping::class,
-                ],
-            ]
-        )
+        ->and(Cart::calculators()->get(\Ozdemir\Aurora\Enums\CartCalculator::TOTAL->value))->toBe([\Ozdemir\Aurora\Tests\Stubs\Calculators\Shipping::class])
         ->and(Cart::total()->amount())->toBe(40.0);
 });
 
@@ -136,13 +130,7 @@ it('can have calculators on cart subtotal', function() {
     );
 
     expect(Cart::quantity())->toBe(1)
-        ->and(Cart::calculators()->toArray())->toBe(
-            [
-                \Ozdemir\Aurora\Enums\CartCalculator::SUBTOTAL->value => [
-                    \Ozdemir\Aurora\Tests\Stubs\Calculators\Discount::class,
-                ],
-            ]
-        )
+        ->and(Cart::calculators()->get(\Ozdemir\Aurora\Enums\CartCalculator::SUBTOTAL->value))->toBe([\Ozdemir\Aurora\Tests\Stubs\Calculators\Discount::class,])
         ->and(Cart::subtotal()->amount())->toBe(190.0)
         ->and(Cart::total()->amount())->toBe(190.0)
         ->and(

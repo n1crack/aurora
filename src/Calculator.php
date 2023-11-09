@@ -10,24 +10,24 @@ class Calculator
 
     public function __construct()
     {
-        $this->pipeline = new CartCalculatorCollection();
+        $this->pipeline = new CartCalculatorCollection(config('cart.calculate_using'));
     }
 
-    public static function calculate($price, $calculations = [])
+    public function calculate($price, $calculations = [])
     {
-        return app('pipeline')
+        return resolve('pipeline')
             ->send([$price, []])
-            ->through(collect($calculations)->reject(fn ($calculation) => $calculation === app(Calculator::class)->skip)->toArray())
+            ->through(collect($calculations)->reject(fn ($calculation) => $calculation === $this->skip)->toArray())
             ->thenReturn();
     }
 
-    public static function skip($class, $callback): mixed
+    public function skip($class, $callback): mixed
     {
-        app(Calculator::class)->skip = is_string($class) ? $class : get_class($class);
+        $this->skip = is_string($class) ? $class : get_class($class);
 
         $value = $callback();
 
-        app(Calculator::class)->skip = null;
+        $this->skip = null;
 
         return $value;
     }
