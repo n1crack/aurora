@@ -15,6 +15,8 @@ class Cart
 
     public CartItemCollection $items;
 
+    private MetaCollection $meta;
+
     public function __construct(readonly public CartStorage $storage)
     {
         $storage_session_key = config('cart.session_key_generator');
@@ -143,11 +145,14 @@ class Cart
     private function save(): void
     {
         $this->putStorage('items', $this->items);
+        $this->putStorage('meta', $this->meta);
     }
 
     private function load(): void
     {
         $this->items = $this->getStorage('items', new CartItemCollection());
+
+        $this->meta = $this->getStorage('meta', new MetaCollection);
 
         $this->pipeline = $this->pipeline->reload($this->getStorage('pipeline'));
     }
@@ -167,11 +172,32 @@ class Cart
         return serialize($this);
     }
 
+    public function meta(): MetaCollection
+    {
+        return $this->meta;
+    }
+
+    public function setMeta($name, $value): void
+    {
+        $this->meta->put($name, $value);
+
+        $this->save();
+    }
+
+    public function removeMeta($name): void
+    {
+        $this->meta->forget($name);
+
+        $this->save();
+    }
+
     public function rollback(string $string): static
     {
         $cart = unserialize($string);
 
         $this->items = $cart->items();
+
+        $this->meta = $cart->meta();
 
         $this->pipeline = $this->pipeline->reload($cart->calculators());
 

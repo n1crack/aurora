@@ -26,10 +26,10 @@ it('can unserialize from serialized string', function() {
     $product->weight = 1;
 
     Cart::add(
-        (new CartItem($product, 3)) // 40 * 3 = 120
-            ->withOption('color', 'blue')
+        $cartItem = (new CartItem($product, 3)) // 40 * 3 = 120
+        ->withOption('color', 'blue')
             ->withOption('size', 's', '10') // + 10
-            ->withOption('size', 's', '5', true) // + 40 * 0,05 =  + 2 // total 40 + 10 + 2 (56 * 3 = 156)
+            ->withOption('type', 'metal', 5, true) // + 40 * 0,05 =  + 2 // total 40 + 10 + 2 (56 * 3 = 156)
     );
 
     // Get serialized text..
@@ -47,5 +47,7 @@ it('can unserialize from serialized string', function() {
     expect(Cart::subtotal()->amount())->toBe(156.0)
         ->and(Cart::total()->amount())->toBe(156.0)
         ->and(Cart::items()->count())->toBe(1)
-        ->and(Cart::quantity())->toBe(3);
+        ->and(Cart::quantity())->toBe(3)
+        ->and($cartItem->options->count())->toBe(3)
+        ->and($cartItem->option('color')->value)->toBe('blue');
 });

@@ -37,14 +37,19 @@ class CartItem implements CartItemInterface
 
         $option->setWeight($weight);
 
-        $this->options->push($option);
+        $this->options->put($name, $option);
 
         return $this;
     }
 
+    public function option(string $name): CartItemOption
+    {
+        return $this->options->get($name);
+    }
+
     public function withMeta(string $name, mixed $value): static
     {
-        $this->meta->push(new CartItemOption($name, $value));
+        $this->meta->put($name, $value);
 
         return $this;
     }
