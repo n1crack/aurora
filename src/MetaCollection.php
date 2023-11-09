@@ -6,7 +6,4 @@ use Illuminate\Support\Collection;
 
 class MetaCollection extends Collection
 {
-
-
-
 }

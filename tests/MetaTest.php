@@ -36,4 +36,3 @@ it('can have items with meta data', function() {
     expect(Cart::total()->amount())->toBe(60.0)
         ->and($cartItem->meta->get('testMeta'))->toBe('ABC123');
 });
-

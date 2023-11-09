@@ -152,7 +152,7 @@ class Cart
     {
         $this->items = $this->getStorage('items', new CartItemCollection());
 
-        $this->meta = $this->getStorage('meta', new MetaCollection);
+        $this->meta = $this->getStorage('meta', new MetaCollection());
 
         $this->pipeline = $this->pipeline->reload($this->getStorage('pipeline'));
     }
