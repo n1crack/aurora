@@ -15,7 +15,7 @@ class CartItem implements CartItemInterface
 
     public Collection $meta;
 
-    public function __construct(public Sellable $model, public int $quantity, public bool $gift = false)
+    public function __construct(public Sellable $product, public int $quantity, public bool $gift = false)
     {
         $this->options = new Collection();
 
@@ -26,7 +26,7 @@ class CartItem implements CartItemInterface
     {
         $options = $this->options->pluck('value')->join('-');
 
-        return $this->hash = md5($this->model->cartItemId() . $options . $this->gift);
+        return $this->hash = md5($this->product->cartItemId() . $options . $this->gift);
     }
 
     public function withOption(string $name, mixed $value, float|int $price = 0, bool $percent = false, float|int $weight = 0): static
@@ -71,12 +71,12 @@ class CartItem implements CartItemInterface
 
     public function weight(): float|int
     {
-        return $this->model->cartItemWeight() * $this->quantity;
+        return $this->product->cartItemWeight() * $this->quantity;
     }
 
     public function itemPrice(): Money
     {
-        return new Money($this->model->cartItemPrice());
+        return new Money($this->product->cartItemPrice());
     }
 
     public function optionPrice(): Money
@@ -98,7 +98,7 @@ class CartItem implements CartItemInterface
         if (array_is_list($subtotalCalculators)) {
             $pipeline = $subtotalCalculators;
         } else {
-            $calculators = collect($subtotalCalculators)->filter(fn ($values) => in_array($this->model->id, $values));
+            $calculators = collect($subtotalCalculators)->filter(fn ($values) => in_array($this->product->id, $values));
             $pipeline = $calculators->keys()->toArray();
         }
 

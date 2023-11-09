@@ -267,7 +267,7 @@ it('can get items from hash', function() {
     $item = Cart::items()->first();
 
     expect(Cart::item($item->hash))->toBeInstanceOf(\Ozdemir\Aurora\CartItem::class)
-        ->and(Cart::item($item->hash)->model->id)->toBe(3)
+        ->and(Cart::item($item->hash)->product->id)->toBe(3)
         ->and(Cart::item($item->hash)->quantity)->toBe(3)
         ->and(Cart::item($item->hash)->unitPrice()->amount())->toBe(30.0)
         ->and(Cart::item($item->hash)->weight())->toBe(3)
