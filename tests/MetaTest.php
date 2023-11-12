@@ -21,6 +21,12 @@ it('can have meta data', function() {
     expect(Cart::meta()->count())->toBe(1)
         ->and(Cart::meta()->get('coupon'))->toBe('ABC123');
 
+
+    Cart::removeMeta('coupon');
+
+    expect(Cart::meta()->count())->toBe(0);
+
+
 });
 
 it('can have items with meta data', function() {
