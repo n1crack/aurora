@@ -4,6 +4,7 @@ namespace Ozdemir\Aurora;
 
 use Ozdemir\Aurora\Contracts\CartItemInterface;
 use Ozdemir\Aurora\Contracts\CartStorage;
+use Ozdemir\Aurora\Contracts\MoneyInterface;
 use Ozdemir\Aurora\Enums\CartCalculator;
 use Ozdemir\Aurora\Enums\CartItemCalculator;
 
@@ -74,17 +75,18 @@ class Cart
         });
     }
 
-    public function subtotal(): Money
+    public function subtotal(): MoneyInterface
     {
         [$subtotal, $breakdowns] = resolve(Calculator::class)->calculate(
             $this->items->subtotal(),
             $this->pipeline[CartCalculator::SUBTOTAL->value] ?? []
         );
 
+
         return $subtotal->setBreakdowns($breakdowns)->round();
     }
 
-    public function total(): Money
+    public function total(): MoneyInterface
     {
         [$total, $breakdowns] = resolve(Calculator::class)->calculate(
             $this->subtotal(),

@@ -4,6 +4,7 @@ namespace Ozdemir\Aurora;
 
 use Illuminate\Support\Collection;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
+use Ozdemir\Aurora\Contracts\MoneyInterface;
 use Ozdemir\Aurora\Contracts\Sellable;
 use Ozdemir\Aurora\Enums\CartItemCalculator;
 
@@ -74,22 +75,26 @@ class CartItem implements CartItemInterface
         return $this->product->cartItemWeight() * $this->quantity;
     }
 
-    public function itemPrice(): Money
+    public function itemPrice(): MoneyInterface
     {
-        return new Money($this->product->cartItemPrice());
+        $money = config('cart.monetary.class');
+
+        return new $money($this->product->cartItemPrice());
     }
 
-    public function optionPrice(): Money
+    public function optionPrice(): MoneyInterface
     {
-        return new Money($this->options->sum(fn (CartItemOption $option) => $option->getPrice($this->itemPrice()->amount())));
+        $money = config('cart.monetary.class');
+
+        return new $money($this->options->sum(fn (CartItemOption $option) => $option->getPrice($this->itemPrice()->amount())));
     }
 
-    public function unitPrice(): Money
+    public function unitPrice(): MoneyInterface
     {
         return $this->itemPrice()->add($this->optionPrice())->round();
     }
 
-    public function subtotal(): Money
+    public function subtotal(): MoneyInterface
     {
         $calculatorArray = app(Calculator::class)->pipeline();
 

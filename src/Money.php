@@ -2,7 +2,9 @@
 
 namespace Ozdemir\Aurora;
 
-class Money
+use Ozdemir\Aurora\Contracts\MoneyInterface;
+
+class Money implements MoneyInterface
 {
     public function __construct(readonly private float|int $amount, private $breakdowns = [])
     {
@@ -27,19 +29,19 @@ class Money
 
     public function round($precision = null, $mode = PHP_ROUND_HALF_UP): static
     {
-        $precision ??= config('cart.currency.precision', 2);
+        $precision ??= config('cart.monetary.precision', 2);
 
         $amount = round($this->amount, $precision, $mode);
 
         return $this->newInstance($amount, $this->breakdowns);
     }
 
-    public function add(self $addend): static
+    public function add(MoneyInterface $addend): static
     {
         return $this->newInstance($this->amount + $addend->amount);
     }
 
-    public function subtract(self $subtrahend): static
+    public function subtract(MoneyInterface $subtrahend): static
     {
         return $this->newInstance($this->amount - $subtrahend->amount);
     }
@@ -54,14 +56,9 @@ class Money
         return $this->newInstance($this->amount / $divisor);
     }
 
-    private function newInstance($amount, $breakdowns = []): static
+    public function newInstance($amount, $breakdowns = []): static
     {
         return new self($amount, $breakdowns);
-    }
-
-    public function isZero(): bool
-    {
-        return $this->amount == 0;
     }
 
     public function __toString()

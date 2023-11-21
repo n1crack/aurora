@@ -17,7 +17,7 @@ return [
 
     'cache_store' => env('CART_STORE', config('cache.default')),
 
-    'currency' => [
+    'monetary' => [
         'class' => Money::class,
 
         'precision' => env('CART_CURRENCY_PRECISION', 2),
