@@ -91,7 +91,7 @@ class CartItem implements CartItemInterface
 
     public function subtotal(): Money
     {
-        $calculatorArray = app(Calculator::class)->pipeline;
+        $calculatorArray = app(Calculator::class)->pipeline();
 
         $subtotalCalculators = $calculatorArray[CartItemCalculator::SUBTOTAL->value] ?? [];
 

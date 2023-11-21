@@ -6,11 +6,16 @@ class Calculator
 {
     public ?string $skip = null;
 
-    public CartCalculatorCollection $pipeline;
+    private CartCalculatorCollection $pipeline;
 
     public function __construct()
     {
         $this->pipeline = new CartCalculatorCollection(config('cart.calculate_using'));
+    }
+
+    public function pipeline()
+    {
+        return $this->pipeline;
     }
 
     public function calculate($price, $calculations = [])

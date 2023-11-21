@@ -21,7 +21,7 @@ class Cart
     {
         $this->sessionKey = call_user_func(new (config('cart.session_key_generator')));
 
-        $this->pipeline = app(Calculator::class)->pipeline;
+        $this->pipeline = app(Calculator::class)->pipeline();
 
         $this->load();
     }
@@ -29,6 +29,11 @@ class Cart
     public function make(CartStorage $storage): static
     {
         return new static($storage);
+    }
+
+    public function clone(): Cart
+    {
+        return tap($this->make($this->storage), fn (Cart $cart) => $cart->loadSession($this->getSessionKey()));
     }
 
     public function items(): CartItemCollection
