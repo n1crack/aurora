@@ -30,21 +30,5 @@ class CartServiceProvider extends ServiceProvider
         $this->app->singleton(Calculator::class, function($app) {
             return new Calculator();
         });
-
-        //        \Ozdemir\Aurora\Facades\Cart::calculateUsing(
-        //            CartCalculator::SUBTOTAL,
-        //            [
-        //                Tax::class,
-        //                ShippingClass::class
-        //            ],
-        //        );
-        //
-        //        \Ozdemir\Aurora\Facades\Cart::calculateUsing(
-        //            CartCalculator::TOTAL,
-        //            [
-        //                Tax::class,
-        //                ShippingClass::class
-        //            ],
-        //        );
     }
 }
