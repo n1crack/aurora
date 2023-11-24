@@ -98,10 +98,10 @@ class Cart
             [$total, $breakdowns] = $this->results;
         }
 
-//        [$total, $breakdowns] = resolve(Calculator::class)->calculate(
-//            $this->subtotal(),
-//            $this->calculators ?? new Collection()
-//        );
+        //        [$total, $breakdowns] = resolve(Calculator::class)->calculate(
+        //            $this->subtotal(),
+        //            $this->calculators ?? new Collection()
+        //        );
         return new CalculationResult($total, $breakdowns);
     }
 
