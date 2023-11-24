@@ -5,14 +5,15 @@ namespace Ozdemir\Aurora;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
 use Ozdemir\Aurora\Contracts\CartStorage;
 use Ozdemir\Aurora\Contracts\MoneyInterface;
-use Ozdemir\Aurora\Enums\CartCalculator;
-use Ozdemir\Aurora\Enums\CartItemCalculator;
+use Ozdemir\Aurora\Traits\RoundingTrait;
 
 class Cart
 {
+    use RoundingTrait;
+
     private string $sessionKey;
 
-    private CartCalculatorCollection $pipeline;
+    private CartCalculatorCollection $calculators;
 
     public CartItemCollection $items;
 
@@ -22,7 +23,7 @@ class Cart
     {
         $this->sessionKey = call_user_func(new (config('cart.session_key_generator')));
 
-        $this->pipeline = app(Calculator::class)->pipeline();
+        $this->calculators = app(Calculator::class)->calculators();
 
         $this->load();
     }
@@ -75,22 +76,16 @@ class Cart
         });
     }
 
-    public function subtotal(): MoneyInterface
+    public function subtotal()
     {
-        [$subtotal, $breakdowns] = resolve(Calculator::class)->calculate(
-            $this->items->subtotal(),
-            $this->pipeline[CartCalculator::SUBTOTAL->value] ?? []
-        );
-
-
-        return $subtotal->setBreakdowns($breakdowns)->round();
+        return $this->items->subtotal()->round();
     }
 
-    public function total(): MoneyInterface
+    public function total()
     {
         [$total, $breakdowns] = resolve(Calculator::class)->calculate(
             $this->subtotal(),
-            $this->pipeline[CartCalculator::TOTAL->value] ?? []
+            $this->calculators ?? new CartCalculatorCollection()
         );
 
         return $total->setBreakdowns($breakdowns)->round();
@@ -170,11 +165,6 @@ class Cart
         return $this->storage->get($this->getSessionKey() . '.' . $key, $default);
     }
 
-    public function snapshot(): string
-    {
-        return serialize($this);
-    }
-
     public function meta(): MetaCollection
     {
         return $this->meta;
@@ -194,6 +184,11 @@ class Cart
         $this->save();
     }
 
+    public function snapshot(): string
+    {
+        return serialize($this);
+    }
+
     public function rollback(string $string): static
     {
         $cart = unserialize($string);
@@ -207,31 +202,19 @@ class Cart
 
     public function calculators(): CartCalculatorCollection
     {
-        return $this->pipeline;
+        return $this->calculators;
     }
 
-    public function calculateTotalUsing(array $pipeline): void
+    public function calculateTotalUsing(array $calculators): void
     {
-        $this->pipeline[CartCalculator::TOTAL->value] = $pipeline;
-    }
-
-    public function calculateSubtotalUsing(array $pipeline): void
-    {
-        $this->pipeline[CartCalculator::SUBTOTAL->value] = $pipeline;
-    }
-
-    public function calculateItemSubtotalUsing(array $pipeline): void
-    {
-        $this->pipeline[CartItemCalculator::SUBTOTAL->value] = $pipeline;
-
-        $this->putStorage('items', $this->items);
+        $this->calculators = new CartCalculatorCollection($calculators);
     }
 
     public function instance(): array
     {
         return [
-            'subtotal' => $this->subtotal(),
-            'total' => $this->total(),
+            // subtotal' => $this->subtotal(),
+            // total' => $this->total(),
             // todo.. breakdowns etc..
         ];
     }

@@ -18,9 +18,5 @@ interface MoneyInterface
 
     public function multiply($multiplier): static;
 
-    public function divide($divisor): static;
-
     public function newInstance($amount, $breakdowns = []): static;
-
-    public function __toString();
 }

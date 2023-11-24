@@ -6,10 +6,12 @@ use Illuminate\Support\Collection;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
 use Ozdemir\Aurora\Contracts\MoneyInterface;
 use Ozdemir\Aurora\Contracts\Sellable;
-use Ozdemir\Aurora\Enums\CartItemCalculator;
+use Ozdemir\Aurora\Traits\RoundingTrait;
 
 class CartItem implements CartItemInterface
 {
+    use RoundingTrait;
+
     public string $hash;
 
     public Collection $options;
@@ -96,28 +98,7 @@ class CartItem implements CartItemInterface
 
     public function subtotal(): MoneyInterface
     {
-        $calculatorArray = app(Calculator::class)->pipeline();
 
-        $subtotalCalculators = $calculatorArray[CartItemCalculator::SUBTOTAL->value] ?? [];
-
-        if (array_is_list($subtotalCalculators)) {
-            $pipeline = $subtotalCalculators;
-        } else {
-            $calculators = collect($subtotalCalculators)->filter(fn ($values) => in_array($this->product->id, $values));
-            $pipeline = $calculators->keys()->toArray();
-        }
-
-        $subtotal = $this->unitPrice()->multiply($this->quantity);
-
-        if (count($pipeline)) {
-            [$subtotal, $breakdowns] = resolve(Calculator::class)->calculate(
-                $this->unitPrice()->multiply($this->quantity),
-                $pipeline
-            );
-
-            return $subtotal->setBreakdowns($breakdowns)->round();
-        }
-
-        return $subtotal->round();
+        return $this->unitPrice()->multiply($this->quantity);
     }
 }

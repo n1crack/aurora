@@ -28,16 +28,6 @@ return [
     'checksum_generator' => GenerateChecksum::class,
 
     'calculate_using' => [
-        CartItemCalculator::SUBTOTAL->value => [
-            //
-        ],
-
-        CartCalculator::SUBTOTAL->value => [
-            //
-        ],
-
-        CartCalculator::TOTAL->value => [
-            //
-        ]
+        //
     ]
 ];

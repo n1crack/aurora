@@ -5,9 +5,11 @@ namespace Ozdemir\Aurora;
 use Illuminate\Support\Collection;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
 use Ozdemir\Aurora\Contracts\MoneyInterface;
+use Ozdemir\Aurora\Traits\RoundingTrait;
 
 class CartItemCollection extends Collection
 {
+    use RoundingTrait;
     /**
      * @param string $key
      */

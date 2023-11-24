@@ -51,18 +51,8 @@ class Money implements MoneyInterface
         return $this->newInstance($this->amount * $multiplier);
     }
 
-    public function divide($divisor): static
-    {
-        return $this->newInstance($this->amount / $divisor);
-    }
-
     public function newInstance($amount, $breakdowns = []): static
     {
         return new self($amount, $breakdowns);
-    }
-
-    public function __toString()
-    {
-        return (string)$this->amount;
     }
 }
