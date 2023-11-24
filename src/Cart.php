@@ -2,9 +2,9 @@
 
 namespace Ozdemir\Aurora;
 
+use Illuminate\Support\Collection;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
 use Ozdemir\Aurora\Contracts\CartStorage;
-use Ozdemir\Aurora\Contracts\MoneyInterface;
 use Ozdemir\Aurora\Traits\RoundingTrait;
 
 class Cart
@@ -13,11 +13,13 @@ class Cart
 
     private string $sessionKey;
 
-    private CartCalculatorCollection $calculators;
+    private Collection $calculators;
 
     public CartItemCollection $items;
 
     private MetaCollection $meta;
+
+    private string $calculationChecksum = '';
 
     public function __construct(readonly public CartStorage $storage)
     {
@@ -76,19 +78,41 @@ class Cart
         });
     }
 
-    public function subtotal()
+    public function subtotal(): float
     {
-        return $this->items->subtotal()->round();
+        return $this->round($this->items->subtotal());
     }
 
-    public function total()
+    public function calculate(): CalculationResult
     {
-        [$total, $breakdowns] = resolve(Calculator::class)->calculate(
-            $this->subtotal(),
-            $this->calculators ?? new CartCalculatorCollection()
-        );
+        $checksum = md5(($subtotal = $this->subtotal()) . $this->calculators ?? new Collection());
 
-        return $total->setBreakdowns($breakdowns)->round();
+        if ($this->calculationChecksum !== $checksum || $this->calculators->contains(fn ($item) => $item instanceof \Closure)) {
+            [$total, $breakdowns] = resolve(Calculator::class)->calculate(
+                $subtotal,
+                $this->calculators ?? new Collection()
+            );
+            $this->calculationChecksum = $checksum;
+            $this->results = [$total, $breakdowns];
+        } else {
+            [$total, $breakdowns] = $this->results;
+        }
+
+//        [$total, $breakdowns] = resolve(Calculator::class)->calculate(
+//            $this->subtotal(),
+//            $this->calculators ?? new Collection()
+//        );
+        return new CalculationResult($total, $breakdowns);
+    }
+
+    public function total(): float
+    {
+        return $this->calculate()->total();
+    }
+
+    public function breakdowns()
+    {
+        return $this->calculate()->breakdowns();
     }
 
     public function weight(): float|int
@@ -200,14 +224,14 @@ class Cart
         return $this;
     }
 
-    public function calculators(): CartCalculatorCollection
+    public function calculators(): Collection
     {
         return $this->calculators;
     }
 
     public function calculateTotalUsing(array $calculators): void
     {
-        $this->calculators = new CartCalculatorCollection($calculators);
+        $this->calculators = new Collection($calculators);
     }
 
     public function instance(): array
@@ -224,8 +248,8 @@ class Cart
         return $this->checksum() === $clientChecksum;
     }
 
-    public function checksum(): string
+    public function checksum($withTotal = true): string
     {
-        return call_user_func(new (config('cart.checksum_generator')));
+        return call_user_func(new (config('cart.checksum_generator')), $withTotal);
     }
 }

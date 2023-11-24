@@ -3,7 +3,6 @@
 namespace Ozdemir\Aurora\Tests\Stubs\Calculators;
 
 use Closure;
-use Ozdemir\Aurora\Money;
 
 /* @noinspection */
 
@@ -11,12 +10,11 @@ class Tax
 {
     public function handle($payload, Closure $next)
     {
-        /* @var Money $price */
         [$price, $breakdowns] = $payload;
 
-        $taxPrice = new Money(15);
+        $taxPrice = 15;
 
-        $price = $price->add($taxPrice);
+        $price = $price + $taxPrice;
 
         $breakdowns[] = ['label' => 'Tax', 'value' => $taxPrice];
 

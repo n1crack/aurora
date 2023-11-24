@@ -2,18 +2,20 @@
 
 namespace Ozdemir\Aurora;
 
+use Illuminate\Support\Collection;
+
 class Calculator
 {
     public ?string $skip = null;
 
-    private CartCalculatorCollection $calculators;
+    private Collection $calculators;
 
     public function __construct()
     {
-        $this->calculators = new CartCalculatorCollection(config('cart.calculate_using'));
+        $this->calculators = new Collection(config('cart.calculate_using'));
     }
 
-    public function calculators(): CartCalculatorCollection
+    public function calculators(): Collection
     {
         return $this->calculators;
     }

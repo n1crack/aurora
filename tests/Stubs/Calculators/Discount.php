@@ -3,7 +3,6 @@
 namespace Ozdemir\Aurora\Tests\Stubs\Calculators;
 
 use Closure;
-use Ozdemir\Aurora\Money;
 
 /* @noinspection */
 
@@ -11,20 +10,19 @@ class Discount
 {
     public function handle($payload, Closure $next)
     {
-        /* @var Money $price */
         [$price, $breakdowns] = $payload;
 
         //        $total = \Ozdemir\Aurora\Calculator::skip($this, function() {
-        //            return \Ozdemir\Aurora\Facades\Cart::total()->amount();
+        //            return \Ozdemir\Aurora\Facades\Cart::total();
         //        });
         //
         //        dump($total);
 
-        $discountPrice = new Money($price->multiply(5 / 100)->amount());
+        $discountPrice = $price * 5 / 100;
 
         $price = $price->subtract($discountPrice);
 
-        $breakdowns[] = ['label' => 'Discount', 'value' => $discountPrice->multiply(-1)];
+        $breakdowns[] = ['label' => 'Discount', 'value' => -1 * $discountPrice];
 
         return $next([$price, $breakdowns]);
     }

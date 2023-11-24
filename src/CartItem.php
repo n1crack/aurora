@@ -4,7 +4,6 @@ namespace Ozdemir\Aurora;
 
 use Illuminate\Support\Collection;
 use Ozdemir\Aurora\Contracts\CartItemInterface;
-use Ozdemir\Aurora\Contracts\MoneyInterface;
 use Ozdemir\Aurora\Contracts\Sellable;
 use Ozdemir\Aurora\Traits\RoundingTrait;
 
@@ -77,28 +76,23 @@ class CartItem implements CartItemInterface
         return $this->product->cartItemWeight() * $this->quantity;
     }
 
-    public function itemPrice(): MoneyInterface
+    public function itemPrice(): float|int
     {
-        $money = config('cart.monetary.class');
-
-        return new $money($this->product->cartItemPrice());
+        return $this->product->cartItemPrice();
     }
 
-    public function optionPrice(): MoneyInterface
+    public function optionPrice(): float|int
     {
-        $money = config('cart.monetary.class');
-
-        return new $money($this->options->sum(fn (CartItemOption $option) => $option->getPrice($this->itemPrice()->amount())));
+        return $this->round($this->options->sum(fn (CartItemOption $option) => $option->getPrice($this->itemPrice())));
     }
 
-    public function unitPrice(): MoneyInterface
+    public function unitPrice(): float|int
     {
-        return $this->itemPrice()->add($this->optionPrice())->round();
+        return $this->round($this->itemPrice() + $this->optionPrice());
     }
 
-    public function subtotal(): MoneyInterface
+    public function subtotal(): float|int
     {
-
-        return $this->unitPrice()->multiply($this->quantity);
+        return $this->unitPrice() * $this->quantity;
     }
 }

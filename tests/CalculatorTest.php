@@ -2,7 +2,6 @@
 
 use Ozdemir\Aurora\CartItem;
 use Ozdemir\Aurora\Facades\Cart;
-use Ozdemir\Aurora\Money;
 
 it('can use calculators', function() {
     Cart::calculateTotalUsing([
@@ -21,7 +20,7 @@ it('can use calculators', function() {
         ->and(Cart::count())->toBe(1)
         ->and(Cart::isEmpty())->toBeFalse()
         ->and(Cart::calculators()->toArray())->toBe([\Ozdemir\Aurora\Tests\Stubs\Calculators\Shipping::class])
-        ->and(Cart::total()->amount())->toBe(40.0);
+        ->and(Cart::total())->toBe(40.0);
 });
 
 
@@ -41,7 +40,7 @@ it('can use multiple calculators', function() {
 
     expect(Cart::quantity())->toBe(1)
         ->and(Cart::isEmpty())->toBeFalse()
-        ->and(Cart::total()->amount())->toBe(55.0);
+        ->and(Cart::total())->toBe(55.0);
 });
 
 it('can have breakdowns', function() {
@@ -59,41 +58,38 @@ it('can have breakdowns', function() {
         new CartItem($product, quantity: 2),
     );
 
-    expect(Cart::total()->amount())->toBe(115.0)
-        ->and(Cart::total()->breakdowns())->toHaveCount(2)
+    expect(Cart::total())->toBe(115.0)
+        ->and(Cart::breakdowns())->toHaveCount(2)
         ->and(
-            json_encode(Cart::total()->breakdowns())
+            json_encode(Cart::breakdowns())
         )
         ->toBe(
             json_encode([
-                ['label' => 'Shipping', 'value' => new Money(10)],
-                ['label' => 'Tax', 'value' => new Money(15)],
+                ['label' => 'Shipping', 'value' => 10],
+                ['label' => 'Tax', 'value' => 15],
             ])
         );
 });
 
-
 it('can have inline calculators', function() {
     Cart::calculateTotalUsing([
         function($payload, Closure $next) {
-            /* @var Money $price */
             [$price, $breakdowns] = $payload;
 
-            $shippingCost = new Money(10);
+            $shippingCost = 10;
 
-            $price = $price->add($shippingCost);
+            $price = $price + $shippingCost;
 
             $breakdowns[] = ['label' => 'Shipping', 'value' => $shippingCost];
 
             return $next([$price, $breakdowns]);
         },
         function($payload, Closure $next) {
-            /* @var Money $price */
             [$price, $breakdowns] = $payload;
 
-            $taxCost = new Money(15);
+            $taxCost = 15;
 
-            $price = $price->add($taxCost);
+            $price = $price + $taxCost;
 
             $breakdowns[] = ['label' => 'Shipping', 'value' => $taxCost];
 
@@ -110,6 +106,6 @@ it('can have inline calculators', function() {
         new CartItem($product, quantity: 2),
     );
 
-    expect(Cart::total()->amount())->toBe(115.0)
-        ->and(Cart::total()->breakdowns())->toHaveCount(2);
+    expect(Cart::total())->toBe(115.0)
+        ->and(Cart::breakdowns())->toHaveCount(2);
 });

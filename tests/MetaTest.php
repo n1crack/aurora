@@ -13,8 +13,7 @@ it('can have meta data', function() {
     Cart::add(new CartItem($product, 2));
 
 
-    expect(Cart::total()->amount())->toBe(60.0);
-
+    expect(Cart::total())->toBe(60.0);
 
     Cart::setMeta('coupon', 'ABC123');
 
@@ -39,6 +38,6 @@ it('can have items with meta data', function() {
         $cartItem = (new CartItem($product, 2))->withMeta('testMeta', 'ABC123')
     );
 
-    expect(Cart::total()->amount())->toBe(60.0)
+    expect(Cart::total())->toBe(60.0)
         ->and($cartItem->meta->get('testMeta'))->toBe('ABC123');
 });

@@ -39,7 +39,7 @@ it('can add items to Cart', function() {
     );
 
     expect(Cart::quantity())->toBe(1)
-        ->and(Cart::total()->amount())->toBe(30.0)
+        ->and(Cart::total())->toBe(30.0)
         ->and(Cart::isEmpty())->toBeFalse();
 });
 
@@ -141,8 +141,8 @@ it('can sum total cart item prices', function() {
     );
 
     expect(Cart::items())->toHaveCount(2)
-        ->and(Cart::total()->amount())->toBe(530.0)
-        ->and(Cart::subtotal()->amount())->toBe(530.0)
+        ->and(Cart::total())->toBe(530.0)
+        ->and(Cart::subtotal())->toBe(530.0)
         ->and(Cart::weight())->toBe(10);
 });
 
@@ -162,7 +162,7 @@ it('can clear the cart', function() {
 
     expect(Cart::isEmpty())->toBeTrue()
         ->and(Cart::items())->toHaveCount(0)
-        ->and(Cart::total()->amount())->toBe(0.0)
+        ->and(Cart::total())->toBe(0.0)
         ->and(Cart::weight())->toBe(0);
 });
 
@@ -182,7 +182,7 @@ it('can remove item from the cart', function() {
     Cart::add(new CartItem($product2, 1));
 
     expect(Cart::items())->toHaveCount(2)
-        ->and(Cart::total()->amount())->toBe(530.0)
+        ->and(Cart::total())->toBe(530.0)
         ->and(Cart::quantity())->toBe(3)
         ->and(Cart::weight())->toBe(10);
 
@@ -191,8 +191,8 @@ it('can remove item from the cart', function() {
     Cart::remove($cartItem->hash());
 
     expect(Cart::items())->toHaveCount(1)
-        ->and(Cart::total()->amount())->toBe(60.0)
-        ->and(Cart::subtotal()->amount())->toBe(60.0)
+        ->and(Cart::total())->toBe(60.0)
+        ->and(Cart::subtotal())->toBe(60.0)
         ->and(Cart::quantity())->toBe(2)
         ->and(Cart::weight())->toBe(2);
 });
@@ -214,7 +214,7 @@ it('can sync the items', function() {
     );
 
     expect(Cart::items())->toHaveCount(2)
-        ->and(Cart::total()->amount())->toBe(530.0)
+        ->and(Cart::total())->toBe(530.0)
         ->and(Cart::quantity())->toBe(3)
         ->and(Cart::weight())->toBe(10);
 
@@ -229,7 +229,7 @@ it('can sync the items', function() {
     );
 
     expect(Cart::items())->toHaveCount(2)
-        ->and(Cart::total()->amount())->toBe(1510.0)
+        ->and(Cart::total())->toBe(1510.0)
         ->and(Cart::quantity())->toBe(12)
         ->and(Cart::weight())->toBe(20);
 });
@@ -269,7 +269,7 @@ it('can get items from hash', function() {
     expect(Cart::item($item->hash))->toBeInstanceOf(\Ozdemir\Aurora\CartItem::class)
         ->and(Cart::item($item->hash)->product->id)->toBe(3)
         ->and(Cart::item($item->hash)->quantity)->toBe(3)
-        ->and(Cart::item($item->hash)->unitPrice()->amount())->toBe(30.0)
+        ->and(Cart::item($item->hash)->unitPrice())->toBe(30.0)
         ->and(Cart::item($item->hash)->weight())->toBe(3)
         ->and(Cart::item($item->hash)->options)->toBeInstanceOf(Collection::class)
         ->and(Cart::item($item->hash)->options)->toHaveCount(2)
@@ -343,7 +343,7 @@ it('can refresh user id after login', function() {
         ->and(Cart::items())->toHaveCount(0)
         ->and(Cart::quantity())->toBe(0)
         ->and(Cart::weight())->toBe(0)
-        ->and(Cart::total()->amount())->toBe(0.0)
+        ->and(Cart::total())->toBe(0.0)
         ->and(Cart::getInstanceKey())->toBe('cart');
 
 });
@@ -383,7 +383,7 @@ it('can load any session Cart', function() {
         ->and(Cart::items())->toHaveCount(0)
         ->and(Cart::quantity())->toBe(0)
         ->and(Cart::weight())->toBe(0)
-        ->and(Cart::total()->amount())->toBe(0.0)
+        ->and(Cart::total())->toBe(0.0)
         ->and(Cart::getInstanceKey())->toBe('cart');
 
     Cart::loadSession($oldSession);
