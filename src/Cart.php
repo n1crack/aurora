@@ -19,8 +19,6 @@ class Cart
 
     private MetaCollection $meta;
 
-    private string $calculationChecksum = '';
-
     public function __construct(readonly public CartStorage $storage)
     {
         $this->sessionKey = call_user_func(new (config('cart.session_key_generator')));
@@ -85,23 +83,10 @@ class Cart
 
     public function calculate(): CalculationResult
     {
-        $checksum = md5(($subtotal = $this->subtotal()) . $this->calculators ?? new Collection());
-
-        if ($this->calculationChecksum !== $checksum || $this->calculators->contains(fn ($item) => $item instanceof \Closure)) {
-            [$total, $breakdowns] = resolve(Calculator::class)->calculate(
-                $subtotal,
-                $this->calculators ?? new Collection()
-            );
-            $this->calculationChecksum = $checksum;
-            $this->results = [$total, $breakdowns];
-        } else {
-            [$total, $breakdowns] = $this->results;
-        }
-
-        //        [$total, $breakdowns] = resolve(Calculator::class)->calculate(
-        //            $this->subtotal(),
-        //            $this->calculators ?? new Collection()
-        //        );
+        [$total, $breakdowns] = resolve(Calculator::class)->calculate(
+            $this->subtotal(),
+            $this->calculators ?? new Collection()
+        );
         return new CalculationResult($total, $breakdowns);
     }
 
