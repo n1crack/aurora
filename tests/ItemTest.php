@@ -16,7 +16,7 @@ it('can return cart item class when a new item added', function() {
         $item = new CartItem($product, quantity: 2),
     );
 
-    expect(get_class($item))->toImplement(\Ozdemir\Aurora\Contracts\CartItemInterface::class)
+    expect($item)->toBeInstanceOf(\Ozdemir\Aurora\Contracts\CartItemInterface::class)
         ->and(Cart::quantity())->toBe(2)
         ->and(Cart::isEmpty())->toBeFalse();
 
