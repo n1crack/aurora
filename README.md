@@ -41,7 +41,6 @@ use Ozdemir\Aurora\Cart;
 use Ozdemir\Aurora\Generators\GenerateChecksum;
 use Ozdemir\Aurora\Generators\GenerateSessionKey;
 use Ozdemir\Aurora\Storages\SessionStorage;
-use Money\Money;
 
 return [
     'instance' => 'cart',
