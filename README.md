@@ -67,12 +67,13 @@ return [
 ## Basic Usage
 
 ```php
-
-use Ozdemir\Aurora\CartItem;
-use Ozdemir\Aurora\Facades\Cart;
-
+// Create a product class implementing the Sellable interface
+class SellableProduct implements Sellable
+{
+    use SellableTrait;
+}
 // Adding an item to the cart
-$product = new YourProductModel(); // Replace with your actual product model
+$product = new SellableProduct(); // Replace with your actual product model
 $cartItem = new CartItem($product, quantity: 2);
 Cart::add($cartItem);
 
@@ -80,14 +81,24 @@ Cart::add($cartItem);
 $total = Cart::total();
 $itemCount = Cart::count();
 $items = Cart::items();
+$itemQuantity = Cart::quantity(); // total quantity
+
+// Adding an item with options to the cart
+Cart::add(
+       (new CartItem($product, quantity: 1))->withOption('color', 'blue')
+                 ->withOption('material', 'metal', price: 5)
+                 ->withOption('size', 'large', weight: 4)
+         );
 
 // Updating item quantity
-Cart::update($cartItem, quantity: 3);
+Cart::update($cartItem->hash(), quantity: 3);
 
 // Removing an item from the cart
-Cart::remove($cartItem);
+Cart::remove($cartItem->hash());
 ```
 
+
+ 
 Aurora Cart supports custom calculators for calculating totals. You can add your custom calculators to the config/cart.php file under the calculate_using key.
 
 ### Example
