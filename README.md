@@ -15,7 +15,6 @@ Aurora Cart is a flexible and feature-rich shopping cart library for Laravel.
 - **MetaData**: Attach meta information to the entire cart or individual items.
 - **Snapshot and Rollback**: Save and restore the cart state for scenarios like order creation.
 - **Validation**: Validate the cart integrity using checksums.
-- **Unit Testing Support**: Convenient assertions for unit testing cart functionality.
 
 ## Installation
 
