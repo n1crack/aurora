@@ -3,6 +3,7 @@
 namespace Ozdemir\Aurora;
 
 use Illuminate\Support\ServiceProvider;
+use Ozdemir\Aurora\Contracts\CartStorage;
 
 class CartServiceProvider extends ServiceProvider
 {
@@ -16,17 +17,18 @@ class CartServiceProvider extends ServiceProvider
         $defaultInstance = config('cart.instance');
 
         $this->app->singleton($defaultInstance, function($app) use ($defaultInstance) {
-            $storageClass = config('cart.storage');
-
-            $storage = new $storageClass($defaultInstance);
-
-            $dispatcher = $app->get('events');
-
             $cartClass = config('cart.cart_class');
 
-            $session = $cartClass::defaultSessionKey();
+            $storageClass = config('cart.storage');
 
-            return new $cartClass($session, $storage, $dispatcher, config('cart') ?? []);
+            /* @var CartStorage $storage */
+            $storage = new $storageClass($defaultInstance);
+
+            return new $cartClass($storage);
+        });
+
+        $this->app->singleton(Calculator::class, function($app) {
+            return new Calculator();
         });
     }
 }

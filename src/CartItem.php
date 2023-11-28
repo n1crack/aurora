@@ -2,182 +2,97 @@
 
 namespace Ozdemir\Aurora;
 
-use Exception;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Validator;
-use Ozdemir\Aurora\Traits\CollectionArrayAccess;
+use Ozdemir\Aurora\Contracts\CartItemInterface;
+use Ozdemir\Aurora\Contracts\Sellable;
+use Ozdemir\Aurora\Traits\RoundingTrait;
 
-class CartItem extends Collection
+class CartItem implements CartItemInterface
 {
-    use CollectionArrayAccess;
+    use RoundingTrait;
 
-    protected array $itemConditionsOrder;
-    private array $config;
+    public string $hash;
 
-    /**
-     * @throws Exception
-     */
-    public function __construct($items, $itemConditionsOrder, $config)
+    public Collection $options;
+
+    public Collection $meta;
+
+    public function __construct(public Sellable $product, public int $quantity, public bool $gift = false)
     {
-        $this->validate($items);
+        $this->options = new Collection();
 
-        $items['attributes'] = $this->setAttributes($items['attributes'] ?? []);
-        $items['conditions'] = new ConditionCollection($items['conditions'] ?? []);
-
-        parent::__construct($items);
-
-        $this->config = $config;
-
-        $this->setItemConditionsOrder($itemConditionsOrder);
-        $this->calculateConditionPrices();
-
-        $this->put('hash', $this->hash());
+        $this->meta = new Collection();
     }
 
-    /**
-     * @param array $itemConditionsOrder
-     */
-    public function setItemConditionsOrder(array $itemConditionsOrder): void
+    public function hash(): string
     {
-        $this->itemConditionsOrder = $itemConditionsOrder;
-        $this->calculateConditionPrices();
+        $options = $this->options->pluck('value')->join('-');
+
+        return $this->hash = md5($this->product->cartItemId() . $options . $this->gift);
     }
 
-    /**
-     * @throws Exception
-     */
-    public function validate($items): void
+    public function withOption(string $name, mixed $value, float|int $price = 0, bool $percent = false, float|int $weight = 0): static
     {
-        $validator = Validator::make($items, [
-            'id' => ['required'],
-            'name' => ['required'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'quantity' => ['required', 'integer', 'min:1'],
-            'attributes' => ['sometimes', 'array'],
-            'conditions' => ['sometimes'],
-            'weight' => ['sometimes', 'numeric', 'min:0'],
-            'sku' => ['sometimes'],
-        ]);
+        $option = new CartItemOption($name, $value);
 
-        if ($validator->fails()) {
-            throw new Exception($validator->errors()->first());
-        }
-    }
+        $option->setPrice($price, $percent);
 
-    public function hash()
-    {
-        $attr = $this->attributes->pluck('value')->join('-');
-        $sku = $this->sku;
+        $option->setWeight($weight);
 
-        return md5($this->id . $attr . $sku);
-    }
-
-    public function increaseQuantity(int $value)
-    {
-        $this->quantity += $value;
-    }
-
-    public function setQuantity(int $value)
-    {
-        $this->quantity = $value;
-    }
-
-    public function decreaseQuantity(int $value)
-    {
-        $this->quantity -= $value;
-    }
-
-    public function getPriceWithoutConditions()
-    {
-        return round($this->price + array_sum(Arr::pluck($this->attributes(), 'price')), $this->config['precision']);
-    }
-
-    public function price(): float
-    {
-        return round($this->calculateConditions($this->getPriceWithoutConditions(), 'price'), $this->config['precision']);
-    }
-
-    public function subtotal(): float
-    {
-        $subtotal = $this->price() * $this->quantity;
-
-        $subtotal = $this->calculateConditions($subtotal, 'subtotal');
-
-        return round($subtotal, $this->config['precision']);
-    }
-
-    public function condition(Condition $condition)
-    {
-        if (!in_array($condition->getTarget(), ['price', 'subtotal'])) {
-            throw new \Exception("The target for the condition can only be a price or subtotal.");
-        }
-        $this->conditions->put($condition->getName(), $condition);
-
-        $this->calculateConditionPrices();
-
-        app(config('cart.instance'))->updateItemStorage();
+        $this->options->put($name, $option);
 
         return $this;
     }
 
-    public function conditions($type = null, $target = null)
+    public function option(string $name): CartItemOption
     {
-        return $this->conditions
-            ->sortByOrder($this->getConditionsOrder())
-            ->filterType($type)
-            ->filterTarget($target);
+        return $this->options->get($name);
     }
 
-    public function weight()
+    public function withMeta(string $name, mixed $value): static
     {
-        return $this->weight ?? 0;
+        $this->meta->put($name, $value);
+
+        return $this;
     }
 
-    public function attributes()
+    public function increaseQuantity(int $value): void
     {
-        return $this->attributes ?? [];
+        $this->quantity += $value;
     }
 
-    public function update($data)
+    public function setQuantity(int $value): void
     {
-        foreach ($data as $key => $value) {
-            $this->{$key} = $value;
-        }
+        $this->quantity = $value;
     }
 
-    /**
-     * @return string[]
-     */
-    public function getConditionsOrder(): array
+    public function decreaseQuantity(int $value): void
     {
-        return $this->itemConditionsOrder;
+        $this->quantity -= $value;
     }
 
-    private function setAttributes($attributes)
+    public function weight(): float|int
     {
-        return collect($attributes)->map(fn ($item) => new CartAttribute($item));
+        return $this->product->cartItemWeight() * $this->quantity;
     }
 
-    /**
-     * @param float|int $subtotal
-     * @return float|int
-     */
-    public function calculateConditions(float|int $subtotal, string $target): int|float
+    public function itemPrice(): float|int
     {
-        foreach ($this->conditions(target: $target) as $condition) {
-            $subtotal += $condition->value;
-        }
-
-        return $subtotal;
+        return $this->product->cartItemPrice();
     }
 
-    /**
-     * @return void
-     */
-    public function calculateConditionPrices(): void
+    public function optionPrice(): float|int
     {
-        $this->conditions(target: 'price')->calculateSubTotal($this->getPriceWithoutConditions());
-        $this->conditions(target: 'subtotal')->calculateSubTotal($this->price() * $this->quantity);
+        return $this->round($this->options->sum(fn (CartItemOption $option) => $option->getPrice($this->itemPrice())));
+    }
+
+    public function unitPrice(): float|int
+    {
+        return $this->round($this->itemPrice() + $this->optionPrice());
+    }
+
+    public function subtotal(): float|int
+    {
+        return $this->unitPrice() * $this->quantity;
     }
 }

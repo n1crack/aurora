@@ -1,132 +1,53 @@
 <?php
 
-use Laravel\SerializableClosure\SerializableClosure;
-use Ozdemir\Aurora\Condition;
+use Ozdemir\Aurora\CartItem;
 use Ozdemir\Aurora\Facades\Cart;
 
-it('can serialize the current', function() {
+it('can snapshot the current cart', function() {
 
-    $condition = new Condition([
-        'name' => 'Condition',
-        'type' => 'tax',
-        'target' => 'subtotal',
-    ]);
-    $condition->setActions([
-        [
-            'value' => '125',
-            'rules' => new SerializableClosure(fn () => Cart::subtotal() > 50),
-        ],
-    ]);
-    Cart::condition($condition);
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
+    $product->id = 3;
+    $product->price = 30;
+    $product->weight = 1;
 
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 3,
-        'price' => 30,
-        'weight' => 1,
-        'attributes' => [
-            'color' => ['label' => 'Blue', 'value' => 'blue'],
-            'size' => ['label' => 'Small', 'value' => 's'],
-        ],
-    ]);
-    expect(Cart::total())->toBe(215.0);
-    expect(Cart::items())->toHaveCount(1);
-    expect(Cart::serialize())->toBeString();
+    Cart::add(
+        (new CartItem($product, 1))
+            ->withOption('color', 'blue')
+            ->withOption('size', 's')
+    );
+    expect(Cart::snapshot())->toBeString();
 });
 
 it('can unserialize from serialized string', function() {
     expect(Cart::isEmpty())->toBeTrue();
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 3,
-        'price' => 30,
-        'weight' => 1,
-        'attributes' => [
-            'color' => ['label' => 'Blue', 'value' => 'blue'],
-            'size' => ['label' => 'Small', 'value' => 's'],
-        ],
-    ]);
+    $product = new \Ozdemir\Aurora\Tests\Stubs\Models\Product();
+    $product->id = 3;
+    $product->price = 40;
+    $product->weight = 1;
 
-    $condition = new Condition([
-        'name' => 'Condition A',
-        'type' => 'coupon',
-        'target' => 'subtotal',
-    ]);
-
-    $condition->setActions([
-        [
-            'value' => '-50%',
-            'rules' => new SerializableClosure(function() {
-                // we shouldn't check Cart::subtotal() here
-                // since we apply the discount on subtotal.
-                // Instead, we check product subtotal.
-                return Cart::getItemSubTotal() > 100;
-            }),
-        ],
-    ]);
-
-    Cart::condition($condition);
+    Cart::add(
+        $cartItem = (new CartItem($product, 3)) // 40 * 3 = 120
+        ->withOption('color', 'blue')
+            ->withOption('size', 's', '10') // + 10
+            ->withOption('type', 'metal', 5, true) // + 40 * 0,05 =  + 2 // total 40 + 10 + 2 (56 * 3 = 156)
+    );
 
     // Get serialized text..
-    $serialized = Cart::serialize();
+    $snapshot = Cart::snapshot();
 
     // Clear
     Cart::clear();
+
     // It is now empty
     expect(Cart::isEmpty())->toBeTrue();
 
-    // init the cart from serialized string
-    Cart::unserialize($serialized);
+    // restore the cart from snapshot
+    Cart::rollback($snapshot);
 
-    expect(Cart::subtotal())->toBe(90.0);
-    expect(Cart::total())->toBe(90.0);
-    expect(Cart::items()->count())->toBe(1);
-    expect(Cart::quantity())->toBe(3);
-
-    // add more item to be able to pass the condition rule
-    Cart::add([
-        'id' => 'tshirt',
-        'name' => 'T-Shirt',
-        'quantity' => 1,
-        'price' => 30,
-        'weight' => 1,
-        'attributes' => [
-            'color' => ['label' => 'Blue', 'value' => 'blue'],
-            'size' => ['label' => 'Small', 'value' => 's'],
-        ],
-    ]);
-
-
-    expect(Cart::items()->count())->toBe(1);
-    expect(Cart::quantity())->toBe(4);
-    // The quantity is not 4
-    // And the subtotal is 120 ( 120 > 100 ). Rule returns true
-    // It applies the -50% on subtotal
-    // It applies the -50% on subtotal
-    expect(Cart::subtotal())->toBe(60.0);
-    expect(Cart::total())->toBe(60.0);
-
-
-    // if we create a new condition on targets total value
-    $condition2 = new Condition([
-        'name' => 'Condition B',
-        'type' => 'shipping',
-        'target' => 'total',
-    ]);
-
-    $condition2->setActions([
-        [
-            'value' => '20',
-            'rules' => new SerializableClosure(function() {
-                // we can check an item quantity here..
-                return Cart::quantity() < 5;
-            }),
-        ],
-    ]);
-    Cart::condition($condition2);
-
-    expect(Cart::subtotal())->toBe(60.0);
-    expect(Cart::total())->toBe(80.0);
+    expect(Cart::subtotal())->toBe(156.0)
+        ->and(Cart::total())->toBe(156.0)
+        ->and(Cart::items()->count())->toBe(1)
+        ->and(Cart::quantity())->toBe(3)
+        ->and($cartItem->options->count())->toBe(3)
+        ->and($cartItem->option('color')->value)->toBe('blue');
 });

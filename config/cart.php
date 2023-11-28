@@ -1,22 +1,28 @@
 <?php
 
-return [
+use Ozdemir\Aurora\Cart;
+use Ozdemir\Aurora\Generators\GenerateChecksum;
+use Ozdemir\Aurora\Generators\GenerateSessionKey;
+use Ozdemir\Aurora\Storages\SessionStorage;
 
+return [
     'instance' => 'cart',
 
-    'storage' => \Ozdemir\Aurora\Storage\SessionStorage::class,
+    'cart_class' => Cart::class,
 
-    'cart_class' => \Ozdemir\Aurora\Cart::class,
+    'storage' => SessionStorage::class,
 
-    'cart_item' => \Ozdemir\Aurora\CartItem::class,
+    'cache_store' => env('CART_STORE', config('cache.default')),
 
-    'cache_store' => config('cache.default'),
-
-    'precision' => 2,
-
-    'condition_order' => [
-        'cart' => ['discount', 'other', 'shipping', 'coupon', 'tax'],
-        'item' => ['discount', 'other', 'shipping', 'coupon', 'tax'],
+    'monetary' => [
+        'precision' => env('CART_CURRENCY_PRECISION', 2),
     ],
 
+    'session_key_generator' => GenerateSessionKey::class,
+
+    'checksum_generator' => GenerateChecksum::class,
+
+    'calculate_using' => [
+        //
+    ]
 ];
