@@ -117,6 +117,8 @@ class Cart
     {
         $this->items = new CartItemCollection();
 
+        $this->meta = new MetaCollection();
+
         $this->save();
     }
 
