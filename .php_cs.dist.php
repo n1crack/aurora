@@ -17,7 +17,7 @@ return (new PhpCsFixer\Config())
         'ordered_imports' => ['sort_algorithm' => 'alpha'],
         'no_unused_imports' => true,
         'not_operator_with_successor_space' => false,
-        'function_declaration' => ['closure_function_spacing' => 'none'],
+        'function_declaration' => ['closure_function_spacing' => 'none', 'closure_fn_spacing' => 'none'],
         'trailing_comma_in_multiline' => true,
         'phpdoc_scalar' => true,
         'unary_operator_spaces' => true,
