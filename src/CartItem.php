@@ -83,7 +83,7 @@ class CartItem implements CartItemInterface
 
     public function optionPrice(): float|int
     {
-        return $this->round($this->options->sum(fn (CartItemOption $option) => $option->getPrice($this->itemPrice())));
+        return $this->round($this->options->sum(fn(CartItemOption $option) => $option->getPrice($this->itemPrice())));
     }
 
     public function unitPrice(): float|int

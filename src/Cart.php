@@ -35,7 +35,7 @@ class Cart
 
     public function clone(): Cart
     {
-        return tap($this->make($this->storage), fn (Cart $cart) => $cart->loadSession($this->getSessionKey()));
+        return tap($this->make($this->storage), fn(Cart $cart) => $cart->loadSession($this->getSessionKey()));
     }
 
     public function items(): CartItemCollection
@@ -103,7 +103,7 @@ class Cart
 
     public function weight(): float|int
     {
-        return $this->items->reduce(fn ($total, CartItemInterface $cartItem) => $total + $cartItem->weight(), 0);
+        return $this->items->reduce(fn($total, CartItemInterface $cartItem) => $total + $cartItem->weight(), 0);
     }
 
     public function remove($hash): void

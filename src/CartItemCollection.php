@@ -33,6 +33,6 @@ class CartItemCollection extends Collection
 
     public function subtotal(): float|int
     {
-        return $this->sum(fn (CartItemInterface $cartItem) => $cartItem->subtotal());
+        return $this->sum(fn(CartItemInterface $cartItem) => $cartItem->subtotal());
     }
 }

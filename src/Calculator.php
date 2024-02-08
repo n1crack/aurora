@@ -24,7 +24,7 @@ class Calculator
     {
         return resolve('pipeline')
             ->send([$price, []])
-            ->through(collect($calculations)->reject(fn ($calculation) => $calculation === $this->skip)->toArray())
+            ->through(collect($calculations)->reject(fn($calculation) => $calculation === $this->skip)->toArray())
             ->thenReturn();
     }
 
