@@ -47,7 +47,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer install --${{ matrix.stability }} --prefer-dist --no-interaction --optimize-autoloader
+          composer install --no-interaction --optimize-autoloader --prefer-dist
 
       - name: Execute tests
         run: vendor/bin/pest --ci --no-coverage
