@@ -19,7 +19,7 @@ class Cart
 
     private MetaCollection $meta;
 
-    public function __construct(readonly public CartStorage $storage)
+    public function __construct(public readonly CartStorage $storage)
     {
         $this->sessionKey = (new (config('cart.session_key_generator')))();
 
