@@ -21,7 +21,7 @@ class Cart
 
     public function __construct(readonly public CartStorage $storage)
     {
-        $this->sessionKey = call_user_func(new (config('cart.session_key_generator')));
+        $this->sessionKey = (new (config('cart.session_key_generator')))();
 
         $this->calculators = app(Calculator::class)->calculators();
 
@@ -238,6 +238,6 @@ class Cart
 
     public function checksum($withTotal = true): string
     {
-        return call_user_func(new (config('cart.checksum_generator')), $withTotal);
+        return (new (config('cart.checksum_generator')))($withTotal);
     }
 }
