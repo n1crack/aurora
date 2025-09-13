@@ -13,8 +13,8 @@ jobs:
       fail-fast: true
       matrix:
         os: [ ubuntu-latest ]
-        php: [ 8.3, 8.4 ]
-        laravel: [ 12 ]
+        php: [ 8.2, 8.3, 8.4 ]
+        laravel: [ 11, 12 ]
         stability: [ prefer-lowest, prefer-stable ]
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
@@ -29,15 +29,25 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
           coverage: none
+          tools: composer:v2
 
       - name: Setup problem matchers
         run: |
           echo "::add-matcher::${{ runner.tool_cache }}/php.json"
           echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-${{ matrix.php }}-composer-
+
       - name: Install dependencies
         run: |
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+          composer install --${{ matrix.stability }} --prefer-dist --no-interaction --optimize-autoloader
 
       - name: Execute tests
-        run: vendor/bin/pest --no-coverage
+        run: vendor/bin/pest --ci --no-coverage
