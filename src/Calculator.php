@@ -28,13 +28,13 @@ class Calculator
 
     public function processResults($price, $calculations = [])
     {
-         return Pipeline::send([$price, []])
-            ->through(
-                collect($calculations)
-                    ->reject(fn($calculation) => $calculation === $this->skip)
-                    ->toArray()
-            )
-            ->thenReturn();
+        return Pipeline::send([$price, []])
+           ->through(
+               collect($calculations)
+                   ->reject(fn($calculation) => $calculation === $this->skip)
+                   ->toArray()
+           )
+           ->thenReturn();
     }
 
     public function skip($class, $callback): mixed
