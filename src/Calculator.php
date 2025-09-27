@@ -3,6 +3,7 @@
 namespace Ozdemir\Aurora;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Pipeline;
 
 class Calculator
 {
@@ -22,9 +23,17 @@ class Calculator
 
     public function calculate($price, $calculations = [])
     {
-        return resolve('pipeline')
-            ->send([$price, []])
-            ->through(collect($calculations)->reject(fn($calculation) => $calculation === $this->skip)->toArray())
+        return once(fn() => $this->processResults($price, $calculations));
+    }
+
+    public function processResults($price, $calculations = [])
+    {
+         return Pipeline::send([$price, []])
+            ->through(
+                collect($calculations)
+                    ->reject(fn($calculation) => $calculation === $this->skip)
+                    ->toArray()
+            )
             ->thenReturn();
     }
 
