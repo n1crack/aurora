@@ -23,7 +23,7 @@ class Calculator
 
     public function calculate($price, $calculations = [])
     {
-        $cartStateHash =  $this->getCartStateHash();
+        $cartStateHash = $this->getCartStateHash();
 
         return once(fn() => $this->processResults($cartStateHash, $price, $calculations));
     }
