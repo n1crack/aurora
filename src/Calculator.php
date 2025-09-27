@@ -23,10 +23,15 @@ class Calculator
 
     public function calculate($price, $calculations = [])
     {
-        return once(fn() => $this->processResults($price, $calculations));
+        $cartStateHash =  $this->getCartStateHash();
+
+        return once(fn() => $this->processResults($cartStateHash, $price, $calculations));
     }
 
-    public function processResults($price, $calculations = [])
+    /**
+     * Hash value here is only for memoization
+     */
+    public function processResults($hash, $price, $calculations = [])
     {
         return Pipeline::send([$price, []])
            ->through(
@@ -35,6 +40,13 @@ class Calculator
                    ->toArray()
            )
            ->thenReturn();
+    }
+
+    public function getCartStateHash()
+    {
+        return sha1(
+            \Ozdemir\Aurora\Facades\Cart::items()->pluck('quantity', 'hash')->toJson()
+        );
     }
 
     public function skip($class, $callback): mixed
