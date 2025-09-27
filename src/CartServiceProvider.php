@@ -31,4 +31,14 @@ class CartServiceProvider extends ServiceProvider
             return new Calculator();
         });
     }
+
+    /**
+     * Bootstrap any package services.
+     */
+    public function boot(): void
+    {
+        $this->publishes([
+            __DIR__.'/../config/cart.php' => config_path('cart.php'),
+        ]);
+    }
 }
